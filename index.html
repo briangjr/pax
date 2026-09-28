@@ -15,19 +15,23 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Chakra+Petch:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+<div class="appFrame">
 <header class="top">
   <div class="logo"><img class="eye" src="images/brand/logo-eye.png" alt="">Taloki</div>
-  <div class="wallet"><div class="bal" id="bal">$0.00</div><button class="add" id="addFunds" aria-label="Add $50 play money">+</button></div>
+  <div class="wallet"><div class="bal" id="bal">$0.00</div><button class="add" id="addFunds" aria-label="Add play money">+</button></div>
 </header>
 
 <main>
   <section class="view on" id="v-packs">
-    <h1>Rip packs.<br>Chase the legends.</h1>
-    <p class="sub">Play money only. Every pack uses the published odds on the Odds tab. Keep your pulls or sell them back at 90% of card value.</p>
+    <div class="hero">
+      <span class="eyebrow">Astral Beasts · Series I</span>
+      <h1>Rip packs.<br>Chase the legends.</h1>
+      <p class="sub">Play money only. Published odds on every pack. Keep your pulls or sell them back at 90% of card value.</p>
+    </div>
     <div class="volBox" id="volPacks"></div>
     <div class="packs" id="packList"></div>
   </section>
@@ -56,6 +60,7 @@
     <h1>Odds</h1>
     <p class="sub">Every pack gives one card. These are the chances of each payout tier, and the pack's average card value compared to its price.</p>
     <div class="volBox" id="volOdds"></div>
+    <div class="volBox" id="oddsBoost"></div>
     <div id="oddsList"></div>
     <h2>Card values</h2>
     <div class="oddsCard"><div class="tbl"><table id="valTable"></table></div></div>
@@ -70,11 +75,12 @@
 <div class="installBar" id="installBar" hidden></div>
 
 <nav class="nav">
-  <button class="on" data-v="packs"><span>🎴</span>Packs</button>
-  <button data-v="col"><span>🗂️</span>Collection</button>
-  <button data-v="odds"><span>📊</span>Odds</button>
-  <button data-v="me"><span>👤</span>Profile</button>
+  <button class="on" data-v="packs"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M5 7h14M9 12l3-2 3 2-3 5z"/></svg><span>Packs</span></button>
+  <button data-v="col"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7.5" height="9" rx="1.8"/><rect x="13.5" y="3" width="7.5" height="9" rx="1.8"/><rect x="3" y="15" width="7.5" height="6" rx="1.8"/><rect x="13.5" y="15" width="7.5" height="6" rx="1.8"/></svg><span>Collection</span></button>
+  <button data-v="odds"><svg viewBox="0 0 24 24"><path d="M4 20h16"/><rect x="5.5" y="11" width="3" height="6" rx="1"/><rect x="10.5" y="7" width="3" height="10" rx="1"/><rect x="15.5" y="4" width="3" height="13" rx="1"/></svg><span>Odds</span></button>
+  <button data-v="me"><svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="4"/><path d="M4.5 20c1.4-3.6 4.2-5.5 7.5-5.5s6.1 1.9 7.5 5.5"/></svg><span>Profile</span></button>
 </nav>
+</div>
 
 <div class="stage" id="stage" aria-live="polite"></div>
 <div class="burst" id="burst"></div>
