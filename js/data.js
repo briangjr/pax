@@ -301,3 +301,38 @@ const PACKS = [
    high:  {odds:[0.262, 0.5931, 0.017, 0.031, 0.057, 0.0399], jackpot:{A:0, P:0, X:0}, skew:2, all:true,
             bands:[[100,200],[200,500],[500,550],[550,650],[650,900],[900,Infinity]]}}
 ];
+
+/* Gold Boost: costs 2x the pack price and makes Gold 25% of pulls. The other tiers shrink to fit,
+   the jackpot doubles, and Gold leans toward its cheaper cards so a boosted pack still averages
+   92% of what you paid. goldLo lowers the Gold floor on the $100/$500 packs. */
+const BOOST = {
+  starter: {
+    normal: {odds:[0.29923, 0.242, 0.10825, 0.06186, 0.03866, 0.25], jackpot:{A:1/30000, P:1/150000, X:1/1000000}, skew:2.111},
+    high: {odds:[0.39343, 0.29229, 0.012, 0.01457, 0.03771, 0.25], jackpot:{A:1/21372, P:1/106861, X:1/712406}, skew:1.194}
+  },
+  base: {
+    normal: {odds:[0.28531, 0.25592, 0.10825, 0.06186, 0.03866, 0.25], jackpot:{A:1/15000, P:1/75000, X:1/500000}, skew:1.807},
+    high: {odds:[0.39343, 0.29229, 0.012, 0.01457, 0.03771, 0.25], jackpot:{A:1/15000, P:1/75000, X:1/500000}, skew:1.172}
+  },
+  pro: {
+    normal: {odds:[0.19021, 0.35102, 0.10825, 0.06186, 0.03866, 0.25], jackpot:{A:1/6000, P:1/30000, X:1/200000}, skew:1.739},
+    high: {odds:[0.39343, 0.29229, 0.012, 0.01457, 0.03771, 0.25], jackpot:{A:1/3807, P:1/19036, X:1/126904}, skew:0.875}
+  },
+  ultra: {
+    normal: {odds:[0.28222, 0.25901, 0.10825, 0.06186, 0.03866, 0.25], jackpot:{A:1/1500, P:1/7500, X:1/60000}, skew:1.325},
+    high: {odds:[0.39343, 0.29229, 0.012, 0.01457, 0.03771, 0.25], jackpot:{A:1/1500, P:1/7500, X:1/60000}, skew:0.479}
+  },
+  legendary: {
+    normal: {odds:[0.30619, 0.23504, 0.10825, 0.06186, 0.03866, 0.25], jackpot:{A:1/500, P:1/2500, X:1/20000}, skew:0.636},
+    high: {odds:[0.39343, 0.29229, 0.012, 0.01457, 0.03771, 0.25], jackpot:{A:1/500, P:1/2500, X:1/20000}, skew:-0.97}
+  },
+  mythic: {
+    normal: {odds:[0.24782, 0.37755, 0.10511, 0.01502, 0.0045, 0.25], jackpot:{A:0, P:0, X:0}, skew:13.636, goldLo:450},
+    high: {odds:[0.19901, 0.50883, 0.01291, 0.02355, 0.0057, 0.25], jackpot:{A:0, P:0, X:0}, skew:4.807, goldLo:450}
+  },
+  sovereign: {
+    normal: {odds:[0.42621, 0.12682, 0.12121, 0.05303, 0.02273, 0.25], jackpot:{A:0, P:0, X:0}, skew:2.753, goldLo:1500},
+    high: {odds:[0.20467, 0.4633, 0.01328, 0.02422, 0.04453, 0.25], jackpot:{A:0, P:0, X:0}, skew:1.137}
+  }
+};
+PACKS.forEach(p => ['normal', 'high'].forEach(m => { p[m].boost = BOOST[p.id][m]; }));

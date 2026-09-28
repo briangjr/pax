@@ -34,46 +34,50 @@ function cardHTML(c, qty){
 }
 const graded = c => !!(c.slab && !c.slab.raw);
 function slabHTML(c){ return `<img class="slabImg" src="${c.slab.src}" alt="${c.name}, graded ${GRADE[c.grade]}">`; }
-function packHTML(p){ return `<div class="pack" style="--pk:${p.pk};--glow:${p.glow}"><div class="tearTop"></div><span class="ptint"></span><span class="gem">${p.gem}</span><span class="pname"><b>${p.name}</b><small>Astral Beasts</small></span></div>`; }
-/* ---- pack engine (per volatility style) ---- */
+function packHTML(p){ return `<div class="pack" style="--pk:${p.pk};--glow:${p.glow}"><div class="tearTop"></div><span class="ptint"></span><span class="gem">$${p.price}</span><span class="pname"><b>${p.name}</b><small>Astral Beasts</small></span></div>`; }
+/* ---- pack engine (per volatility style, optional Gold Boost) ---- */
 const vol = () => S.vol === 'high' ? 'high' : 'normal';
+const conf = (p, m, b) => b ? p[m].boost : p[m];            // Gold Boost swaps in its own odds
+const cost = (p, b) => p.price * (b ? 2 : 1);
 const POOLS = {};
-function band(p, m, i){   // big packs set their own dollar ranges; the rest scale with price
+function band(p, m, i, b){   // big packs set their own dollar ranges; the rest scale with price
+  if (b && i === 5 && p[m].boost.goldLo) return [p[m].boost.goldLo, Infinity];
   if (p[m].bands) return p[m].bands[i];
   const [lo, hi] = MODES[m].bands[i]; return [lo * p.price, hi * p.price]; }
-function bandPool(p, m, i){
-  const k = p.id + m + i;
-  if (!POOLS[k]) { const [lo, hi] = band(p, m, i); POOLS[k] = CARDS.filter(c => (p[m].all || !'APX'.includes(c.r)) && c.value >= lo && c.value < hi); }
+function bandPool(p, m, i, b){
+  const k = p.id + m + i + (b && i === 5 ? 'B' : '');
+  if (!POOLS[k]) { const [lo, hi] = band(p, m, i, b); POOLS[k] = CARDS.filter(c => (p[m].all || !'APX'.includes(c.r)) && c.value >= lo && c.value < hi); }
   return POOLS[k];
 }
 const goldWeight = (c, s) => Math.pow(c.value, -s);
 function pickGold(pool, s){ const tot = pool.reduce((a,c) => a + goldWeight(c, s), 0); let x = rand() * tot;
   for (const c of pool) { x -= goldWeight(c, s); if (x < 0) return c; } return pool[pool.length - 1]; }
-function bandMean(p, m, i){ const pool = bandPool(p, m, i), s = p[m].skew;
-  return i === 5 ? pool.reduce((a,c) => a + c.value * goldWeight(c, s), 0) / pool.reduce((a,c) => a + goldWeight(c, s), 0)
-                 : pool.reduce((a,c) => a + c.value, 0) / pool.length; }
-function jackpotTotal(p, m){ const j = p[m].jackpot; return j.A + j.P + j.X; }
-function bandRange(p, m, i){ const [lo, hi] = band(p, m, i); return i === 5 || hi === Infinity ? `${money(lo)}+` : `${money(lo)} – ${money(hi)}`; }
-/* chance that one pack gives an Ascended, Apex or Mythic Legend (jackpot plus any chase cards sitting in regular tiers) */
-function chaseChance(p, m = vol()){
-  const c = p[m]; let q = jackpotTotal(p, m);
-  if (c.all) c.odds.forEach((o, i) => { const pool = bandPool(p, m, i), s = c.skew;
-    const w = x => i === 5 ? goldWeight(x, s) : 1, tot = pool.reduce((a,x) => a + w(x), 0);
-    q += (i === 5 ? o - jackpotTotal(p, m) : o) * pool.filter(x => 'APX'.includes(x.r)).reduce((a,x) => a + w(x), 0) / tot; });
+function poolWeights(p, m, b, i){ const pool = bandPool(p, m, i, b), s = conf(p, m, b).skew;
+  return pool.map(c => [c, i === 5 ? goldWeight(c, s) : 1]); }
+function bandMean(p, m, i, b){ const w = poolWeights(p, m, b, i), t = w.reduce((a,[,x]) => a + x, 0); return w.reduce((a,[c,x]) => a + c.value * x, 0) / t; }
+function jackpotTotal(p, m, b){ const j = conf(p, m, b).jackpot; return j.A + j.P + j.X; }
+function bandRange(p, m, i, b){ const [lo, hi] = band(p, m, i, b); return i === 5 || hi === Infinity ? `${money(lo)}+` : `${money(lo)} – ${money(hi)}`; }
+/* chance a pull is worth at least what you paid, and chance of an Ascended or better */
+function shareOf(p, m, b, test){
+  const c = conf(p, m, b); let q = 0;
+  c.odds.forEach((o, i) => { const w = poolWeights(p, m, b, i), t = w.reduce((a,[,x]) => a + x, 0);
+    q += (i === 5 ? o - jackpotTotal(p, m, b) : o) * w.filter(([x]) => test(x)).reduce((a,[,x]) => a + x, 0) / t; });
   return q;
 }
-function packStats(p, m = vol()){
-  let ev = 0; const c = p[m];
-  c.odds.forEach((q, i) => { ev += (i === 5 ? q - jackpotTotal(p, m) : q) * bandMean(p, m, i); });
+function chaseChance(p, m = vol(), b = false){ return jackpotTotal(p, m, b) + (p[m].all ? shareOf(p, m, b, x => 'APX'.includes(x.r)) : 0); }
+function profitChance(p, m = vol(), b = false){ const k = cost(p, b); return jackpotTotal(p, m, b) + shareOf(p, m, b, x => x.value >= k); }
+function packStats(p, m = vol(), b = false){
+  let ev = 0; const c = conf(p, m, b);
+  c.odds.forEach((q, i) => { ev += (i === 5 ? q - jackpotTotal(p, m, b) : q) * bandMean(p, m, i, b); });
   for (const r of ['A','P','X']) ev += c.jackpot[r] * avg(r);
-  return {ev, profit: c.odds.slice(2).reduce((a,b) => a + b, 0), jp: jackpotTotal(p, m)};
+  return {ev, profit: profitChance(p, m, b), jp: jackpotTotal(p, m, b), gold: c.odds[5]};
 }
-function pullFrom(p, m = vol()){
-  const c = p[m]; let x = rand(), i = 0, acc = 0;
+function pullFrom(p, m = vol(), b = false){
+  const c = conf(p, m, b); let x = rand(), i = 0, acc = 0;
   for (; i < 5; i++) { acc += c.odds[i]; if (x < acc) break; }
   if (i === 5) { let y = rand() * c.odds[5];
     for (const r of ['X','P','A']) { if (y < c.jackpot[r]) return {band:5, card:pick(BY[r]), jackpot:true}; y -= c.jackpot[r]; } }
-  return {band:i, card: i === 5 ? pickGold(bandPool(p, m, 5), c.skew) : pick(bandPool(p, m, i))};
+  return {band:i, card: i === 5 ? pickGold(bandPool(p, m, 5, b), c.skew) : pick(bandPool(p, m, i))};
 }
 const MAX_PULL = () => Math.max(...CARDS.map(c => c.value));
 const pct = x => x >= 1 ? '100%' : x === 0 ? '—' : x >= .1 ? (x*100).toFixed(0)+'%' : x >= .01 ? (x*100).toFixed(1)+'%' : x >= .001 ? (x*100).toFixed(2)+'%' : +(x*100).toPrecision(2)+'%';
@@ -95,29 +99,45 @@ function renderPacks(){
   renderVol();
   const m = vol();
   $('#packList').innerHTML = PACKS.map(p => {
-    const st = packStats(p, m);
-    return `<div class="packTile">${packHTML(p)}
-      <div class="packInfo"><b class="pt">${p.name}</b><div class="meta">1 card · avg value ${money(st.ev)}<br>${Math.round(st.profit*100)}% chance to profit<br>Ascended or better ${oneIn(chaseChance(p, m))}${m === 'high' ? ' · <b class="hiTag">High</b>' : ''}</div>
-      <button class="buy" data-p="${p.id}">Rip for ${money(p.price)}</button></div></div>`;
+    const st = packStats(p, m), bs = packStats(p, m, true);
+    return `<article class="packTile">
+      <div class="ptArt">${packHTML(p)}</div>
+      <div class="packInfo">
+        <div class="ptHead"><b class="pt">${p.name}</b><span class="ptPrice">${money(p.price)}</span></div>
+        <dl class="ptStats">
+          <div><dt>Avg value</dt><dd>${money(st.ev)}</dd></div>
+          <div><dt>Profit</dt><dd>${Math.round(st.profit * 100)}%</dd></div>
+          <div><dt>Gold</dt><dd>${(st.gold * 100).toFixed(st.gold < 0.1 ? 1 : 0)}%</dd></div>
+          <div><dt>Ascended+</dt><dd>${oneIn(chaseChance(p, m)) || Math.round(chaseChance(p, m) * 100) + '%'}</dd></div>
+        </dl>
+        <div class="ptBtns">
+          <button class="buy" data-p="${p.id}"><span>Open pack</span><small>$${p.price.toLocaleString("en-US")}</small></button>
+          <button class="boostBtn" data-pb="${p.id}" title="Gold Boost: pay 2x, Gold becomes 25% of pulls"><span>Gold Boost</span><small>$${(p.price * 2).toLocaleString("en-US")} · ${Math.round(bs.gold * 100)}% Gold</small></button>
+        </div>
+      </div></article>`;
   }).join('');
-  document.querySelectorAll('.buy[data-p]').forEach(b => b.onclick = () => openPack(b.dataset.p));
+  document.querySelectorAll('.buy[data-p]').forEach(b => b.onclick = () => openPack(b.dataset.p, false));
+  document.querySelectorAll('.boostBtn[data-pb]').forEach(b => b.onclick = () => openPack(b.dataset.pb, true));
   renderBal();
 }
 
-function bandBars(p, m){
-  const odds = p[m].odds, top = Math.max(...odds);
-  return odds.map((q, i) => `<div class="bandRow"><span class="bl">${bandRange(p, m, i)}</span>
+function bandBars(p, m, b){
+  const odds = conf(p, m, b).odds, top = Math.max(...odds);
+  return odds.map((q, i) => `<div class="bandRow"><span class="bl">${bandRange(p, m, i, b)}</span>
     <span class="bb"><i style="width:${Math.max(q/top*100, 1.5)}%;--c:${TIERS[i].rgb}"></i></span><span class="bp">${(q*100).toFixed(1)}%</span></div>`).join('');
 }
 function renderOdds(){
   renderVol();
-  const maxPull = MAX_PULL(), m = vol();
+  const maxPull = MAX_PULL(), m = vol(), b = !!S.oddsBoost;
+  $('#oddsBoost').innerHTML = `<div class="seg"><button data-ob="0" class="${b ? '' : 'on'}">Standard</button><button data-ob="1" class="${b ? 'on' : ''}">Gold Boost</button></div>
+    <p class="volDesc">${b ? 'Gold Boost costs 2x the pack price and makes Gold 25% of pulls.' : 'Regular odds at the listed pack price.'}</p>`;
+  document.querySelectorAll('[data-ob]').forEach(x => x.onclick = () => { S.oddsBoost = x.dataset.ob === '1'; save(); renderOdds(); });
   $('#oddsList').innerHTML = PACKS.map(p => {
-    const st = packStats(p, m), j = p[m].jackpot;
-    return `<div class="oddsCard"><header><b>${p.gem} ${p.name}</b><span class="meta">${money(p.price)} · 1 card · avg value ${money(st.ev)} (${Math.round(st.ev/p.price*100)}%)</span></header>
-    <div class="bands">${bandBars(p, m)}</div>
+    const st = packStats(p, m, b), j = conf(p, m, b).jackpot, k = cost(p, b);
+    return `<div class="oddsCard"><header><b>${p.name}</b><span class="meta">${money(k)}${b ? ' (Gold Boost)' : ''} · 1 card · avg value ${money(st.ev)} (${Math.round(st.ev/k*100)}%)</span></header>
+    <div class="bands">${bandBars(p, m, b)}</div>
     <p class="meta">Min value <strong>${money(band(p, m, 0)[0])}</strong> · Max pull <strong>${money(maxPull)}</strong><br>
-    ${p[m].all ? `Ascended, Apex and Mythic Legend cards sit in the upper tiers of this pack. Chance of one: ${oneIn(chaseChance(p, m)) || Math.round(chaseChance(p, m) * 100) + '%'}.`
+    ${p[m].all ? `Ascended, Apex and Mythic Legend cards sit in the upper tiers of this pack. Chance of one: ${oneIn(chaseChance(p, m, b)) || Math.round(chaseChance(p, m, b) * 100) + '%'}.`
       : `Gold includes a jackpot: Ascended ${oneIn(j.A)}, Apex ${oneIn(j.P)}, Mythic Legend ${oneIn(j.X)}.`}</p></div>`;
   }).join('');
   $('#valTable').innerHTML = `<tr><th>Rarity</th><th>Cards in set</th><th>Value range</th></tr>` +
@@ -214,19 +234,19 @@ $('#sellDupes').onclick = () => sell(Object.entries(S.col).filter(([,q]) => q > 
 
 /* ============ PACK OPENING ============ */
 const RM = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
-let cur = null, lastPack = null;   // cur = {p, m, band, card, jackpot}
+let cur = null, lastPack = null, lastBoost = false;   // cur = {p, m, boost, band, card, jackpot}
 const wait = ms => new Promise(r => setTimeout(r, RM() ? Math.min(ms, 150) : ms));
 
-function openPack(pid){
-  const p = PACKS.find(x => x.id === pid);
-  if (S.bal < p.price) { toast('Not enough funds. Tap + to add play money.'); return; }
-  lastPack = pid;
-  S.bal = Math.round((S.bal - p.price) * 100) / 100; S.spent += p.price; S.opened++;
+function openPack(pid, boost = false){
+  const p = PACKS.find(x => x.id === pid), k = cost(p, boost);
+  if (S.bal < k) { toast('Not enough funds. Tap + to add play money.'); return; }
+  lastPack = pid; lastBoost = boost;
+  S.bal = Math.round((S.bal - k) * 100) / 100; S.spent = Math.round((S.spent + k) * 100) / 100; S.opened++;
   const m = vol();
-  cur = Object.assign({p, m}, pullFrom(p, m));
+  cur = Object.assign({p, m, boost}, pullFrom(p, m, boost));
   const c = cur.card;
   S.col[c.id] = (S.col[c.id] || 0) + 1; if (!S.best || c.value > CARD[S.best].value) S.best = c.id;
-  S.history = [{t: Date.now(), p: p.id, c: c.id, b: cur.band, m}, ...(S.history || [])].slice(0, 300);
+  S.history = [{t: Date.now(), p: p.id, c: c.id, b: cur.band, m, g: boost ? 1 : 0}, ...(S.history || [])].slice(0, 300);
   save(); renderBal();
   document.body.style.overflow = 'hidden';
   const st = $('#stage');
@@ -273,7 +293,7 @@ function showChooser(){
   SB().innerHTML = `<button class="topX" id="cancelPick" aria-label="Close">✕</button>
     <div class="hint">Pick your pack</div><div class="carousel" id="car">${items.join('')}</div>
     <button class="buy pickBtn" id="pickBtn">Open this pack</button>
-    <div class="meta hintSm">${MODES[cur.m].name} style · swipe to browse · tap a pack to choose it</div>`;
+    <div class="meta hintSm">${MODES[cur.m].name} style${cur.boost ? ' · Gold Boost' : ''} · swipe to browse · tap a pack to choose it</div>`;
   $('#cancelPick').onclick = () => { if (confirm('Leave now? Your pack is already paid for, so its card goes straight to your collection.')) closeStage(); };
   const car = $('#car'), els = [...car.children];
   const w = () => els[1].offsetLeft - els[0].offsetLeft;
@@ -457,7 +477,7 @@ function showResults(){
     <div class="resTier"><span class="tchip" style="--c:${cur.jackpot ? '255,215,60' : tierRGB(cur.band)}">${cur.jackpot ? 'Jackpot' : TIERS[cur.band].name + ' tier'}</span></div>
     <div class="meta tiny">Drag to tilt · tap the card to flip it</div>
     <div class="resBtns"><button class="sellB" id="sellPull">Sell · ${money(sellPrice(c))}</button><button class="keepB" id="keep">Keep</button></div>
-    <button class="againB" id="again">Rip another ${p.name} · ${money(p.price)}</button>
+    <button class="againB" id="again">Rip another ${p.name}${cur.boost ? ' · Gold Boost' : ''} · ${money(cost(p, cur.boost))}</button>
   </div>`;
   attach3d($('.res .v3d'));
   const rv = $('#rv'), t0 = performance.now(), D = RM() ? 1 : 900;
@@ -465,7 +485,7 @@ function showResults(){
   requestAnimationFrame(count);
   $('#keep').onclick = $('#closeRes').onclick = closeStage;
   $('#sellPull').onclick = () => { sell([[c.id, 1]]); closeStage(); };
-  $('#again').onclick = () => { closeStage(); openPack(lastPack); };
+  $('#again').onclick = () => { closeStage(); openPack(lastPack, lastBoost); };
 }
 function closeStage(){ const st = $('#stage'); st.className = 'stage'; st.innerHTML = ''; document.body.style.overflow = ''; renderCol(); renderBal(); renderProfile(); }
 
@@ -521,7 +541,7 @@ function renderProfile(){
     <h2>Pull history</h2>
     ${hist.length ? `<div class="histList">${hist.slice(0, 100).map(h => { const c = CARD[h.c], p = PACKS.find(x => x.id === h.p); if (!c) return '';
       return `<div class="histRow" data-id="${c.id}"><i class="hdot" style="--c:${TIERS[h.b] ? TIERS[h.b].rgb : '154,163,178'}"></i>
-        <div class="hMain"><b>${c.name}</b><span>${p ? p.name : 'Pack'}${h.m === 'high' ? ' · High' : ''} · ${new Date(h.t).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})}</span></div>
+        <div class="hMain"><b>${c.name}</b><span>${p ? p.name : 'Pack'}${h.m === 'high' ? ' · High' : ''}${h.g ? ' · Boost' : ''} · ${new Date(h.t).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})}</span></div>
         <b class="hVal">${money(c.value)}</b></div>`; }).join('')}</div>` : `<div class="empty">Your pulls will show up here.</div>`}
     <h2>Settings</h2>
     <div class="actions"><button class="ghost" id="resetAll">Reset balance, collection and history</button></div>`;
@@ -546,3 +566,14 @@ renderPacks(); renderOdds(); renderCol(); renderProfile();
     const go = bar.querySelector('.ibGo'); if (go) go.onclick = async () => { e.prompt(); await e.userChoice; bar.hidden = true; }; });
   if (ios) show('<span>For full screen: tap <b>Share</b> then <b>Add to Home Screen</b></span>');
 })();
+
+/* ============ OFFLINE ============ */
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      if (!navigator.serviceWorker.controller) reg.addEventListener('updatefound', () => {
+        const w = reg.installing; if (w) w.addEventListener('statechange', () => { if (w.state === 'activated') toast('Taloki is saved for offline play'); });
+      });
+    }).catch(() => {});
+  });
+}
