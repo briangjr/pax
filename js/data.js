@@ -337,6 +337,22 @@ const BOOST = {
 };
 PACKS.forEach(p => ['normal', 'high'].forEach(m => { p[m].boost = BOOST[p.id][m]; }));
 
+/* Max and 50/50 pack styles. Max: 90% a low card, 10% a chase-range card. 50/50: half the time a low card,
+   half the time a card worth about 1.7-2x the pack. Both still average 92% of the price (skew tunes the top tier).
+   Gold Boost isn't offered on these two styles. */
+MODES.max   = {name:'Max',   desc:'The widest range of outcomes. Chase the top tier.'};
+MODES.fifty = {name:'50/50', desc:'50% chance of pulling a card from the highest or lowest tier.'};
+const STYLE_EXTRA = {
+  starter: {"max": {"odds": [0.9, 0, 0, 0, 0, 0.1], "jackpot": {"A": 0, "P": 0, "X": 0}, "skew": 2.1444, "all": true, "bands": [[0.1, 0.35], [0, 0], [0, 0], [0, 0], [0, 0], [4, Infinity]]}, "fifty": {"odds": [0.5, 0, 0, 0, 0, 0.5], "jackpot": {"A": 0, "P": 0, "X": 0}, "skew": 0.9627, "all": true, "bands": [[0.1, 0.25], [0, 0], [0, 0], [0, 0], [0, 0], [1.43, 1.93]]}},
+  base: {"max": {"odds": [0.9, 0, 0, 0, 0, 0.1], "jackpot": {"A": 0, "P": 0, "X": 0}, "skew": 2.0223, "all": true, "bands": [[0.2, 0.7], [0, 0], [0, 0], [0, 0], [0, 0], [8, Infinity]]}, "fifty": {"odds": [0.5, 0, 0, 0, 0, 0.5], "jackpot": {"A": 0, "P": 0, "X": 0}, "skew": -0.1764, "all": true, "bands": [[0.1, 0.5], [0, 0], [0, 0], [0, 0], [0, 0], [2.91, 3.94]]}},
+  pro: {"max": {"odds": [0.9, 0, 0, 0, 0, 0.1], "jackpot": {"A": 0, "P": 0, "X": 0}, "skew": 1.9334, "all": true, "bands": [[0.5, 1.75], [0, 0], [0, 0], [0, 0], [0, 0], [20, Infinity]]}, "fifty": {"odds": [0.5, 0, 0, 0, 0, 0.5], "jackpot": {"A": 0, "P": 0, "X": 0}, "skew": -3.3581, "all": true, "bands": [[0.25, 1.25], [0, 0], [0, 0], [0, 0], [0, 0], [7.26, 9.82]]}},
+  ultra: {"max": {"odds": [0.9, 0, 0, 0, 0, 0.1], "jackpot": {"A": 0, "P": 0, "X": 0}, "skew": 1.9361, "all": true, "bands": [[1, 3.5], [0, 0], [0, 0], [0, 0], [0, 0], [40, Infinity]]}, "fifty": {"odds": [0.5, 0, 0, 0, 0, 0.5], "jackpot": {"A": 0, "P": 0, "X": 0}, "skew": -2.1959, "all": true, "bands": [[0.5, 2.5], [0, 0], [0, 0], [0, 0], [0, 0], [14.42, 19.51]]}},
+  legendary: {"max": {"odds": [0.9, 0, 0, 0, 0, 0.1], "jackpot": {"A": 0, "P": 0, "X": 0}, "skew": 3.0197, "all": true, "bands": [[2.5, 8.75], [0, 0], [0, 0], [0, 0], [0, 0], [100, Infinity]]}, "fifty": {"odds": [0.5, 0, 0, 0, 0, 0.5], "jackpot": {"A": 0, "P": 0, "X": 0}, "skew": -1.7143, "all": true, "bands": [[1.25, 6.25], [0, 0], [0, 0], [0, 0], [0, 0], [32.33, 53.88]]}},
+  mythic: {"max": {"odds": [0.9, 0, 0, 0, 0, 0.1], "jackpot": {"A": 0, "P": 0, "X": 0}, "skew": 2.6241, "all": true, "bands": [[10, 35], [0, 0], [0, 0], [0, 0], [0, 0], [400, Infinity]]}, "fifty": {"odds": [0.5, 0, 0, 0, 0, 0.5], "jackpot": {"A": 0, "P": 0, "X": 0}, "skew": -1.0054, "all": true, "bands": [[5, 25], [0, 0], [0, 0], [0, 0], [0, 0], [129.95, 216.59]]}},
+  sovereign: {"max": {"odds": [0.9, 0, 0, 0, 0, 0.1], "jackpot": {"A": 0, "P": 0, "X": 0}, "skew": 1.7354, "all": true, "bands": [[50, 175], [0, 0], [0, 0], [0, 0], [0, 0], [2000, Infinity]]}, "fifty": {"odds": [0.5, 0, 0, 0, 0, 0.5], "jackpot": {"A": 0, "P": 0, "X": 0}, "skew": -1.0044, "all": true, "bands": [[25, 125], [0, 0], [0, 0], [0, 0], [0, 0], [654.14, 1090.23]]}}
+};
+PACKS.forEach(p => Object.assign(p, STYLE_EXTRA[p.id]));
+
 /* ============ PAX SET REGISTRY ============
    Each section of PAX (Taloki, NFL, NBA) is a "set" with its own cards and packs.
    All sets share the payout tiers (TIERS), pack styles (MODES) and the one PAX wallet. */

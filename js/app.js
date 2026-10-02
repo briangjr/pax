@@ -87,12 +87,12 @@ const graded = c => c.sport ? !!c.grade : !!(c.slab && !c.slab.raw);
 const markHTML = () => G.sport ? '<span class="mEye pxMark"><img src="images/brand/pax-logo.webp" alt=""></span>' : '<span class="mEye"><img src="images/brand/eye.webp" alt=""></span>';
 function packHTML(p){
   const cover = p.cover ? `;--packimg:url('${p.cover}')` : '';
-  return `<div class="pack${G.sport ? ' sp' : ''}${p.cover ? ' hasCover' : ''}" style="--pk:${p.pk};--glow:${p.glow}${cover}"><div class="tearTop"></div><span class="ptint"></span>
+  return `<div class="pack${G.sport ? ' sp' : ''}${p.cover ? ' hasCover' : ''}" style="--pk:${p.pk};--glow:${p.glow}${cover}"><div class="tearTop"></div><span class="ptint"></span><i class="crimp ct"></i><i class="crimp cb"></i>
     ${G.sport && !p.cover ? `<span class="pkIco">${ICON[G.sport]}</span><span class="pkPax">PAX</span>` : ''}
     <span class="gem">$${p.price}</span><span class="pname"><b>${p.name}</b><small>${G.packLabel}</small></span></div>`;
 }
 /* ---- pack engine (per volatility style, optional Gold Boost) ---- */
-const vol = () => S.vol === 'high' ? 'high' : 'normal';
+const vol = () => MODES[S.vol] ? S.vol : 'normal';
 const conf = (p, m, b) => b ? p[m].boost : p[m];            // Gold Boost swaps in its own odds
 const cost = (p, b) => p.price * (b ? 2 : 1);
 const POOLS = {};
@@ -116,7 +116,7 @@ function bandRange(p, m, i, b){ const [lo, hi] = band(p, m, i, b); return i === 
 /* chance a pull is worth at least what you paid, and chance of a chase card (top three rarities) */
 function shareOf(p, m, b, test){
   const c = conf(p, m, b); let q = 0;
-  c.odds.forEach((o, i) => { const w = poolWeights(p, m, b, i), t = w.reduce((a,[,x]) => a + x, 0);
+  c.odds.forEach((o, i) => { if (!o) return; const w = poolWeights(p, m, b, i), t = w.reduce((a,[,x]) => a + x, 0);
     q += (i === 5 ? o - jackpotTotal(p, m, b) : o) * w.filter(([x]) => test(x)).reduce((a,[,x]) => a + x, 0) / t; });
   return q;
 }
@@ -124,7 +124,7 @@ function chaseChance(p, m = vol(), b = false){ return jackpotTotal(p, m, b) + (p
 function profitChance(p, m = vol(), b = false){ const k = cost(p, b); return jackpotTotal(p, m, b) + shareOf(p, m, b, x => x.value >= k); }
 function packStats(p, m = vol(), b = false){
   let ev = 0; const c = conf(p, m, b);
-  c.odds.forEach((q, i) => { ev += (i === 5 ? q - jackpotTotal(p, m, b) : q) * bandMean(p, m, i, b); });
+  c.odds.forEach((q, i) => { if (q) ev += (i === 5 ? q - jackpotTotal(p, m, b) : q) * bandMean(p, m, i, b); });
   for (const r of ['A','P','X']) ev += c.jackpot[r] * avg(r);
   return {ev, profit: profitChance(p, m, b), jp: jackpotTotal(p, m, b), gold: c.odds[5]};
 }
@@ -139,66 +139,118 @@ const MAX_PULL = () => Math.max(...G.CARDS.map(c => c.value));
 const pct = x => x >= 1 ? '100%' : x === 0 ? '—' : x >= .1 ? (x*100).toFixed(0)+'%' : x >= .01 ? (x*100).toFixed(1)+'%' : x >= .001 ? (x*100).toFixed(2)+'%' : +(x*100).toPrecision(2)+'%';
 const oneIn = x => x <= 0 ? '' : x >= .5 ? '' : `1 in ${Math.round(1/x).toLocaleString('en-US')}`;
 
-/* ============ RENDER ============ */
-function renderBal(){ $('#bal').textContent = money(S.bal); document.querySelectorAll('.buy[data-p]').forEach(b => b.disabled = S.bal < G.PACKS.find(p => p.id === b.dataset.p).price); }
+/* ============ RENDER: main pack screen ============ */
+let PI = 0;                                   // pack centered in the carousel
+const boostOK = m => m === 'normal' || m === 'high';
+const boostOn = () => !!S.boost && boostOK(vol());
+const curPack = () => G.PACKS[Math.min(PI, G.PACKS.length - 1)];
+const nice = v => v >= 100 || v % 1 === 0 ? '$' + Math.round(v).toLocaleString('en-US') : money(v);
+const pctTxt = q => q === 0 ? '0%' : (Math.round(q * 1000) / 10) % 1 === 0 ? Math.round(q * 100) + '%' : (q * 100).toFixed(1) + '%';
+function packRange(p, m, b){                  // lowest and highest card this pack can give
+  const c = conf(p, m, b); let lo = Infinity, hi = 0;
+  c.odds.forEach((q, i) => { if (!q) return; bandPool(p, m, i, b).forEach(x => { lo = Math.min(lo, x.value); hi = Math.max(hi, x.value); }); });
+  for (const r of ['A','P','X']) if (c.jackpot[r] > 0) G.BY[r].forEach(x => { hi = Math.max(hi, x.value); });
+  return [lo, hi];
+}
+function textOn(hex){ const h = hex.replace('#',''), n = parseInt(h.length === 3 ? h.split('').map(x => x + x).join('') : h, 16);
+  const l = (0.299 * (n >> 16 & 255) + 0.587 * (n >> 8 & 255) + 0.114 * (n & 255)) / 255; return l > 0.62 ? '#0A0B0D' : '#fff'; }
+function renderBal(){
+  $('#bal').textContent = money(S.bal);
+  const b = $('#buyBtn'); if (b && G.PACKS.length) b.classList.toggle('short', S.bal < cost(curPack(), boostOn()));
+}
+function renderCat(){
+  $('#catIco').innerHTML = catIcon(G.id);
+  $('#catName').textContent = G.name;
+  $('#catMenu').innerHTML = ['taloki','nfl','nba'].map(id => `<button data-cat="${id}" class="${id === G.id ? 'on' : ''}"><span class="ci">${catIcon(id)}</span>${SETS[id].name}</button>`).join('');
+  $('#catMenu').querySelectorAll('[data-cat]').forEach(b => b.onclick = () => { closeCat(); if (b.dataset.cat !== G.id) switchSet(b.dataset.cat); });
+}
+const catIcon = id => id === 'taloki' ? '<img src="images/brand/logo-eye.png" alt="">' : ICON[SETS[id].sport];
+function openCat(){ $('#catMenu').hidden = false; $('#catBtn').classList.add('open'); }
+function closeCat(){ $('#catMenu').hidden = true; $('#catBtn').classList.remove('open'); }
+$('#catBtn').onclick = e => { e.stopPropagation(); $('#catMenu').hidden ? openCat() : closeCat(); };
+document.addEventListener('click', e => { if (!e.target.closest('#catMenu')) closeCat(); });
 
-function volToggle(){
-  return `<div class="volT"><div class="volHead"><span>Pack style</span>
-    <div class="seg">${Object.entries(MODES).map(([k, v]) => `<button data-vol="${k}" class="${k === vol() ? 'on' : ''}">${v.name}</button>`).join('')}</div></div>
-    <p class="volDesc">${MODES[vol()].desc}</p></div>`;
-}
-function renderVol(){
-  ['#volPacks', '#volOdds'].forEach(sel => { const el = $(sel); if (el) el.innerHTML = volToggle(); });
-  document.querySelectorAll('[data-vol]').forEach(b => b.onclick = () => { S.vol = b.dataset.vol; save(); renderPacks(); renderOdds(); });
-}
 function renderPacks(){
-  renderVol();
-  const m = vol();
-  $('#packList').innerHTML = G.PACKS.map(p => {
-    const st = packStats(p, m), bs = packStats(p, m, true);
-    return `<article class="packTile">
-      <div class="ptArt">${packHTML(p)}</div>
-      <div class="packInfo">
-        <div class="ptHead"><b class="pt">${p.name}</b><span class="ptPrice">${money(p.price)}</span></div>
-        <dl class="ptStats">
-          <div><dt>Avg value</dt><dd>${money(st.ev)}</dd></div>
-          <div><dt>Profit</dt><dd>${Math.round(st.profit * 100)}%</dd></div>
-          <div><dt>Gold</dt><dd>${(st.gold * 100).toFixed(st.gold < 0.1 ? 1 : 0)}%</dd></div>
-          <div><dt>${G.chaseLabel}</dt><dd>${oneIn(chaseChance(p, m)) || Math.round(chaseChance(p, m) * 100) + '%'}</dd></div>
-        </dl>
-        <div class="ptBtns">
-          <button class="buy" data-p="${p.id}"><span>Open pack</span><small>$${p.price.toLocaleString("en-US")}</small></button>
-          <button class="boostBtn" data-pb="${p.id}" title="Gold Boost: pay 2x, Gold becomes 25% of pulls"><span>Gold Boost</span><small>$${(p.price * 2).toLocaleString("en-US")} · ${Math.round(bs.gold * 100)}% Gold</small></button>
-        </div>
-      </div></article>`;
-  }).join('');
-  document.querySelectorAll('.buy[data-p]').forEach(b => b.onclick = () => openPack(b.dataset.p, false));
-  document.querySelectorAll('.boostBtn[data-pb]').forEach(b => b.onclick = () => openPack(b.dataset.pb, true));
+  PI = Math.min(S.pi && S.pi[G.id] || 0, G.PACKS.length - 1);
+  const car = $('#pkCar');
+  car.innerHTML = G.PACKS.map((p, i) => `<div class="pkItem" data-i="${i}">${packHTML(p)}</div>`).join('');
+  const els = [...car.children];
+  const step = () => els.length > 1 ? els[1].offsetLeft - els[0].offsetLeft : 1;
+  const paint = () => { const cx = car.scrollLeft + car.clientWidth / 2;
+    els.forEach(el => { const d = Math.min(1, Math.abs(el.offsetLeft + el.offsetWidth / 2 - cx) / step());
+      el.style.transform = `scale(${1 - d * .16})`; el.style.opacity = 1 - d * .45; }); };
+  const settle = () => { const i = Math.max(0, Math.min(els.length - 1, Math.round(car.scrollLeft / step())));
+    if (i !== PI) { PI = i; S.pi = Object.assign(S.pi || {}, {[G.id]: i}); save(); renderPackInfo(); } };
+  let t;
+  car.onscroll = () => { paint(); clearTimeout(t); t = setTimeout(settle, 90); };
+  els.forEach((el, i) => el.onclick = () => { if (i !== PI) car.scrollTo({left: i * step(), behavior: RM() ? 'auto' : 'smooth'}); });
+  requestAnimationFrame(() => { car.scrollLeft = PI * step(); paint(); });
+  renderPackInfo();
+}
+function renderPackInfo(){
+  const p = curPack(), m = vol(), b = boostOn(), [lo, hi] = packRange(p, m, b);
+  $('#pkTitle').textContent = p.name;
+  $('#pkMin').textContent = nice(lo);
+  $('#pkMax').textContent = nice(hi);
+  $('#pkStyle').innerHTML = `${MODES[m].name}${b ? '<small> + Boost</small>' : ''}`;
+  const btn = $('#buyBtn');
+  btn.style.setProperty('--bc', p.glow); btn.style.color = textOn(p.glow);
+  btn.innerHTML = `Buy for ${nice(cost(p, b))}`;
   renderBal();
 }
+$('#buyBtn').onclick = () => openPack(curPack().id, boostOn());
+$('#styleBtn').onclick = () => openStyleSheet();
+$('#insideBtn').onclick = () => openInside();
 
-function bandBars(p, m, b){
+/* ---- bottom sheets ---- */
+function openBS(html){ $('#bsIn').innerHTML = html; $('#bs').classList.add('on'); document.body.classList.add('sheetOpen'); }
+function closeBS(){ $('#bs').classList.remove('on'); document.body.classList.remove('sheetOpen'); }
+$('#bs').onclick = e => { if (e.target.id === 'bs') closeBS(); };
+
+function oddsRows(p, m, b){
   const odds = conf(p, m, b).odds, top = Math.max(...odds);
-  return odds.map((q, i) => `<div class="bandRow"><span class="bl">${bandRange(p, m, i, b)}</span>
-    <span class="bb"><i style="width:${Math.max(q/top*100, 1.5)}%;--c:${TIERS[i].rgb}"></i></span><span class="bp">${(q*100).toFixed(1)}%</span></div>`).join('');
+  return odds.map((q, i) => `<div class="orow${q ? '' : ' zero'}"><span class="ol">${q ? bandRange(p, m, i, b).replace(/\.00/g, '') : '-'}</span>
+    <span class="ob"><i style="width:${q ? Math.max(q / top * 100, 2) : 0}%;--c:${TIERS[i].rgb}"></i></span><span class="op">${pctTxt(q)}</span></div>`).join('');
 }
-function renderOdds(){
-  renderVol();
-  const maxPull = MAX_PULL(), m = vol(), b = !!S.oddsBoost;
-  $('#oddsBoost').innerHTML = `<div class="seg"><button data-ob="0" class="${b ? '' : 'on'}">Standard</button><button data-ob="1" class="${b ? 'on' : ''}">Gold Boost</button></div>
-    <p class="volDesc">${b ? 'Gold Boost costs 2x the pack price and makes Gold 25% of pulls.' : 'Regular odds at the listed pack price.'}</p>`;
-  document.querySelectorAll('[data-ob]').forEach(x => x.onclick = () => { S.oddsBoost = x.dataset.ob === '1'; save(); renderOdds(); });
-  $('#oddsList').innerHTML = G.PACKS.map(p => {
-    const st = packStats(p, m, b), j = conf(p, m, b).jackpot, k = cost(p, b);
-    return `<div class="oddsCard"><header><b>${p.name}</b><span class="meta">${money(k)}${b ? ' (Gold Boost)' : ''} · 1 card · avg value ${money(st.ev)} (${Math.round(st.ev/k*100)}%)</span></header>
-    <div class="bands">${bandBars(p, m, b)}</div>
-    <p class="meta">Min value <strong>${money(band(p, m, 0)[0])}</strong> · Max pull <strong>${money(maxPull)}</strong><br>
-    ${p[m].all ? `${G.chaseNames} cards sit in the upper tiers of this pack. Chance of one: ${oneIn(chaseChance(p, m, b)) || Math.round(chaseChance(p, m, b) * 100) + '%'}.`
-      : `Gold includes a jackpot: ${G.RAR.A.name} ${oneIn(j.A)}, ${G.RAR.P.name} ${oneIn(j.P)}, ${G.RAR.X.name} ${oneIn(j.X)}.`}</p></div>`;
-  }).join('');
-  $('#valTable').innerHTML = `<tr><th>Rarity</th><th>Cards in set</th><th>Value range</th></tr>` +
-    G.ORDER.map(r => `<tr><td><span class="dot" style="background:var(--${r})"></span>${G.RAR[r].name}</td><td>${G.RAR[r].count}</td><td>${money(Math.min(...G.BY[r].map(c => c.value)))} – ${money(Math.max(...G.BY[r].map(c => c.value)))}</td></tr>`).join('') +
-    ['X','P','A'].map(r => `<tr><th>${G.RAR[r].name}</th><th>Grade</th><th>Value</th></tr>` + G.BY[r].map(c => `<tr><td>#${c.num} ${c.name}</td><td>${c.grade || 'Raw'}</td><td>${money(c.value)}</td></tr>`).join('')).join('');
+function openStyleSheet(){
+  let tm = vol(), tb = !!S.boost;
+  const draw = () => {
+    const p = curPack(), b = tb && boostOK(tm), [lo, hi] = packRange(p, tm, b), st = packStats(p, tm, b);
+    openBS(`<div class="ssHead"><div class="ssIco">${packHTML(p)}</div>
+        <div class="ssTxt"><h3>${MODES[tm].name}</h3><p>${MODES[tm].desc}</p></div><button class="ssX" id="ssX" aria-label="Close">✕</button></div>
+      <div class="ssLbl">Choose your pack style</div>
+      <div class="ssSeg">${Object.entries(MODES).map(([k, v]) => `<button data-m="${k}" class="${k === tm ? 'on' : ''}">${v.name}</button>`).join('')}</div>
+      <button class="ssBoost${b ? ' on' : ''}${boostOK(tm) ? '' : ' off'}" id="ssBoost"><span class="tg"><i></i></span>
+        <span><b>Gold Boost</b><small>${boostOK(tm) ? 'Pay 2x, Gold becomes 25% of pulls' : 'Not available on ' + MODES[tm].name}</small></span></button>
+      <div class="ssOdds">Estimated Payout Odds:</div>
+      <div class="orows">${oddsRows(p, tm, b)}</div>
+      <div class="ssRange"><span>Min Value</span><b>${nice(lo)}</b><i class="dots"></i><b>${nice(hi)}</b><span>Max Pull</span></div>
+      <p class="ssNote">${p.name} · ${nice(cost(p, b))} · average card value ${money(st.ev)} (${Math.round(st.ev / cost(p, b) * 100)}%). Play money only. Every pull is random and the odds above are exact. Selling a card back pays 90% of its value.</p>
+      <button class="buyBig" id="ssApply" style="--bc:${p.glow};color:${textOn(p.glow)}">Apply</button>`);
+    $('#ssX').onclick = closeBS;
+    document.querySelectorAll('.ssSeg [data-m]').forEach(x => x.onclick = () => { tm = x.dataset.m; draw(); });
+    $('#ssBoost').onclick = () => { if (boostOK(tm)) { tb = !tb; draw(); } };
+    $('#ssApply').onclick = () => { S.vol = tm; S.boost = tb; save(); closeBS(); renderPackInfo(); };
+  };
+  draw();
+}
+/* every card the centered pack can give, with its exact chance */
+function cardChances(p, m, b){
+  const c = conf(p, m, b), pr = new Map();
+  c.odds.forEach((q, i) => { if (!q) return; const w = poolWeights(p, m, b, i), t = w.reduce((a, [, x]) => a + x, 0), qq = i === 5 ? q - jackpotTotal(p, m, b) : q;
+    w.forEach(([card, x]) => pr.set(card, (pr.get(card) || 0) + qq * x / t)); });
+  for (const r of ['A','P','X']) if (c.jackpot[r] > 0) G.BY[r].forEach(card => pr.set(card, (pr.get(card) || 0) + c.jackpot[r] / G.BY[r].length));
+  return [...pr].sort((a, b2) => b2[0].value - a[0].value);
+}
+function openInside(){
+  const p = curPack(), m = vol(), b = boostOn(), list = cardChances(p, m, b), SHOW = 60;
+  openBS(`<div class="ssHead"><div class="ssIco">${packHTML(p)}</div>
+      <div class="ssTxt"><h3>What's inside</h3><p>${p.name} · ${MODES[m].name}${b ? ' + Gold Boost' : ''} · ${list.length} possible cards</p></div><button class="ssX" id="ssX" aria-label="Close">✕</button></div>
+    <div class="wiList">${list.slice(0, SHOW).map(([c, q]) => `<div class="wiRow"><div class="wiCard">${cardHTML(c)}</div>
+      <div class="wiMain"><b>${esc(c.name)}</b><span>${c.sport ? c.vname + (c.serial ? ' ' + c.serial : '') : G.RAR[c.r].name}${c.grade ? ' · ' + G.GRADE[c.grade] : ''}</span></div>
+      <div class="wiVal"><b>${money(c.value)}</b><span>${q >= .5 ? pctTxt(q) : '1 in ' + Math.round(1 / q).toLocaleString('en-US')}</span></div></div>`).join('')}</div>
+    ${list.length > SHOW ? `<p class="ssNote">+ ${list.length - SHOW} more cards from ${money(list[list.length - 1][0].value)} to ${money(list[SHOW][0].value)}.</p>` : ''}`);
+  $('#ssX').onclick = closeBS;
 }
 
 function colValue(sid = G.id){ return Object.entries(S.cols[sid]).reduce((a,[id,q]) => a + SETS[sid].CARD[id].value * q, 0); }
@@ -304,7 +356,7 @@ function sell(pairs, sid = G.id){
   for (const [id,q] of pairs) { const have = col[id] || 0, k = Math.min(q, have); if (!k) continue; col[id] = have - k; if (!col[id]) delete col[id]; total += sellPrice(SETS[sid].CARD[id]) * k; n += k; }
   total = Math.round(total * 100) / 100;
   if (!n) { toast('Nothing to sell'); return 0; }
-  S.bal = Math.round((S.bal + total) * 100) / 100; S.earned += total; save(); renderBal(); renderCol(); renderProfile(); renderHub();
+  S.bal = Math.round((S.bal + total) * 100) / 100; S.earned += total; save(); renderBal(); renderCol(); renderProfile(); if (document.body.dataset.view === 'show') renderShowroom();
   toast(`Sold ${n} card${n>1?'s':''} for ${money(total)}`);
   return total;
 }
@@ -329,7 +381,7 @@ function openPack(pid, boost = false){
   if (!S.bestBy[G.id] || c.value > G.CARD[S.bestBy[G.id]].value) S.bestBy[G.id] = c.id;
   S.history = [{t: Date.now(), s: G.id, p: p.id, c: c.id, b: cur.band, m, g: boost ? 1 : 0}, ...(S.history || [])].slice(0, 300);
   save(); renderBal();
-  document.body.style.overflow = 'hidden';
+  document.body.style.overflow = 'hidden'; document.body.classList.add('opening'); closeBS(); closeCat();
   const st = $('#stage');
   st.className = 'stage on';
   st.innerHTML = `<div class="stars">${Array.from({length: 90}, () =>
@@ -396,9 +448,9 @@ function showChooser(){
 
 /* ---- Step 2: swipe across the top to cut the pack open ---- */
 function showRip(){
-  const glow = cur.jackpot ? ' gold' : cur.band >= 4 ? ' fire' : cur.band >= 2 ? ' teal' : '';
+  // the pack looks the same no matter what's inside
   SB().innerHTML = `<div class="hint">Swipe across the top to cut it open</div>
-    <div class="bigpack seam${glow}" id="bp" tabindex="0" role="button" aria-label="Cut the pack open: swipe across the top, or press Enter">${packHTML(cur.p)}<i class="streak"></i>
+    <div class="bigpack seam" id="bp" tabindex="0" role="button" aria-label="Cut the pack open: swipe across the top, or press Enter">${packHTML(cur.p)}<i class="streak"></i>
       <div class="cutZone" id="cz"><i class="cutGuide"></i><i class="cutLine" id="cl"></i><i class="blade" id="bl"></i><i class="ghostFinger"></i></div></div>
     <div class="hint hintSm">Drag your finger along the dashed line</div>`;
   const bp = $('#bp'), cz = $('#cz'), cl = $('#cl'), bl = $('#bl');
@@ -423,28 +475,29 @@ function mysteryHTML(rgb){
   const face = cls => `<div class="mf${cls}">${markHTML()}</div>`;
   return `<div class="myst" id="myst" style="--tc:${rgb}"><div class="mIn" id="mIn">${face('')}${face(' mb')}</div></div>`;
 }
+/* Every half-turn shows a random color. The number of turns and the spin time never depend on the
+   result, so nothing hints at the outcome until the card stops on its final color. */
 function showSpin(){
-  const band = cur.band, seq = [0, 0, 0, 0];
-  for (let t = 1; t <= band; t++) seq.push(t);          // climbs one tier per half-turn
-  if (band === 0) seq.push(0, 0);
-  if (cur.jackpot) seq.push(5, 5, 'J');                  // jackpot: extra spins, then rainbow
-  const N = seq.length - 1;
+  const band = cur.band, N = 11, seq = [];
+  const randTier = prev => { let x; do { x = Math.floor(rand() * TIERS.length); } while (x === prev); return x; };
+  for (let k = 0; k < N; k++) seq.push(randTier(seq[k - 1]));
+  seq.push(cur.jackpot ? 'J' : band);                     // the last turn lands on the real result
   SB().innerHTML = `<button class="skip" id="skip">Skip</button>
-    <div class="spinBox">${mysteryHTML(tierRGB(0))}</div>
-    <div class="tierLbl" id="tl"><b>${TIERS[0].name}</b></div>
+    <div class="spinBox">${mysteryHTML(tierRGB(seq[0]))}</div>
+    <div class="tierLbl" id="tl"><b style="color:rgb(${tierRGB(seq[0])})">${TIERS[seq[0]].name}</b></div>
     <div class="hint hintSm" id="spd">Tap to speed up</div>`;
   const myst = $('#myst'), mIn = $('#mIn'), tl = $('#tl');
   let speed = 1, t = 0, last = performance.now(), k = 0, done = false;
-  const T = RM() ? 0.2 : Math.max(2.4, 0.55 * N) * (cur.jackpot ? 1.35 : 1);
+  const T = RM() ? 0.2 : 3.6;
   const setTier = x => {
     if (x === 'J') { myst.classList.add('rainbow'); tl.innerHTML = '<b class="jp">JACKPOT</b><small>A chase card is inside</small>'; sparks('255,215,60', 40, myst, 220); return; }
     myst.style.setProperty('--tc', tierRGB(x));
     tl.innerHTML = `<b style="color:rgb(${tierRGB(x)})">${TIERS[x].name}</b>`;
-    if (x > 0) sparks(tierRGB(x), 14 + x * 4, myst, 150);
+    if (!done) sparks(tierRGB(x), 10, myst, 130);
   };
   const land = () => { if (done) return; done = true;
     mIn.style.transform = 'rotateX(8deg) rotateY(0deg)';
-    const fin = seq[N]; if (fin !== 'J') setTier(fin); else setTier('J');
+    setTier(seq[N]);
     ring(tierRGB(band), myst); sparks(tierRGB(band), 34 + band * 6, myst, 230); flashRGB(tierRGB(band), cur.jackpot);
     myst.classList.add('landed'); $('#spd').textContent = '';
     setTimeout(showPeel, RM() ? 200 : cur.jackpot ? 1500 : 1000);
@@ -469,6 +522,8 @@ const SLAB_AR = 0.62;
 function faceAR(c){ return c.sport ? (c.grade ? SLAB_AR : 5/7) : c.slab ? c.slab.ar : 5/7; }
 function frontHTML(c){ if (c.sport) return c.grade ? spSlabHTML(c) : spCardHTML(c);
   return graded(c) ? `<img class="slabImg" src="${c.slab.src}" alt="${c.name}">` : cardHTML(c); }
+/* every cover is the same card shape; the real card (raw or graded) is fitted inside it */
+function fitStyle(ar){ const box = 5/7; return ar < box ? `height:100%;width:${(ar / box * 100).toFixed(2)}%` : `width:100%;height:${(box / ar * 100).toFixed(2)}%`; }
 function clipHalf(poly, f){
   const out = [];
   for (let i = 0; i < poly.length; i++) {
@@ -484,8 +539,8 @@ function showPeel(){
   SB().onclick = null;
   SB().innerHTML = `<button class="skip" id="skip">Skip</button>
     <div class="hint">${cur.jackpot ? 'Jackpot! Peel it open' : TIERS[cur.band].name + ' tier · peel it open'}</div>
-    <div class="peelWrap" id="pw" style="--ar:${faceAR(c)};--tc:${rgb}">
-      <div class="pfront" id="pfr">${frontHTML(c)}</div>
+    <div class="peelWrap" id="pw" style="--ar:${5/7};--tc:${rgb}">
+      <div class="pfront" id="pfr"><div class="pfit" style="${fitStyle(faceAR(c))}">${frontHTML(c)}</div></div>
       <div class="pcover mf${cur.jackpot ? ' rainbowBg' : ''}" id="pc">${markHTML()}</div>
       <div class="pflapWrap"><div class="pflap" id="pf"></div></div>
     </div>
@@ -571,61 +626,63 @@ function showResults(){
   $('#sellPull').onclick = () => { sell([[c.id, 1]]); closeStage(); };
   $('#again').onclick = () => { closeStage(); openPack(lastPack, lastBoost); };
 }
-function closeStage(){ const st = $('#stage'); st.className = 'stage'; st.innerHTML = ''; document.body.style.overflow = ''; renderCol(); renderBal(); renderProfile(); renderHub(); }
+function closeStage(){ const st = $('#stage'); st.className = 'stage'; st.innerHTML = ''; document.body.style.overflow = ''; document.body.classList.remove('opening'); renderCol(); renderBal(); renderProfile(); }
 
-/* ============ PAX HUB + NAV ============ */
+/* ============ NAV + CATEGORY SWITCH ============ */
 function showView(v){
   document.querySelectorAll('.nav button').forEach(x => x.classList.toggle('on', x.dataset.v === v));
   document.querySelectorAll('.view').forEach(el => el.classList.toggle('on', el.id === 'v-' + v));
+  document.body.dataset.view = v;
   if (v === 'col') renderCol();
+  if (v === 'show') renderShowroom();
+  if (v === 'hist') renderHistory();
   if (v === 'me') renderProfile();
-  if (v === 'hub') renderHub();
   scrollTo(0,0);
 }
 document.querySelectorAll('.nav button').forEach(b => b.onclick = () => showView(b.dataset.v));
 
-function setMode(mode){   // 'hub' = PAX home, 'set' = inside Taloki / NFL / NBA, 'hubMe' = profile opened from home
-  document.body.dataset.mode = mode;
-  document.body.dataset.set = mode === 'set' ? G.id : '';
-  const logo = $('#logo');
-  if (mode === 'set') logo.innerHTML = (G.sport ? `<span class="secIco">${ICON[G.sport]}</span>` : '<img class="eye" src="images/brand/logo-eye.png" alt="">') + `<span>${G.name}</span>`;
-  else logo.innerHTML = '<img class="paxIcon" src="images/brand/pax-logo.webp" alt=""><span class="paxWord">PAX</span>';
-}
-function enterSet(id){
+function applySet(id){
   G = SETS[id]; COL = S.cols[id]; S.set = id; save();
-  $('#heroEyebrow').textContent = G.eyebrow; $('#heroTitle').innerHTML = G.headline;
+  document.body.dataset.set = id;
   if (S.filter !== 'all' && S.filter !== 'owned' && !G.RAR[S.filter]) S.filter = 'all';
-  setMode('set'); renderPacks(); renderOdds(); renderCol(); showView('packs');
+  renderCat(); renderPacks(); renderCol();
+  if (document.body.dataset.view === 'show') renderShowroom();
 }
-function goHub(){ setMode('hub'); showView('hub'); }
-$('#backHub').onclick = goHub;
-$('#hubMe').onclick = () => { setMode('hubMe'); showView('me'); };
+function switchSet(id){   // short "Loading packs" moment, like changing category in a pack app
+  const ld = $('#pkLoad');
+  ld.innerHTML = `<div class="ldIcons">${[0,1,2].map(i => `<span style="animation-delay:${i * .12}s">${catIcon(id)}</span>`).join('')}</div><small>Loading packs…</small>`;
+  document.body.classList.add('loading');
+  setTimeout(() => { applySet(id); setTimeout(() => document.body.classList.remove('loading'), RM() ? 0 : 260); }, RM() ? 0 : 420);
+}
 
-function hubFan(id){
-  const T = SETS[id], picks = id === 'taloki' ? [T.CARD[3], T.CARD[1], T.CARD[2]] : [T.BY.X[2], T.BY.X[0], T.BY.X[1]];
-  return `<div class="fan">${picks.map((c, i) => `<div class="fanCard f${i}">${frontHTML(c)}</div>`).join('')}</div>`;
+/* ---- showroom: your best cards across PAX ---- */
+function renderShowroom(){
+  const all = [];
+  for (const k in SETS) for (const id in S.cols[k]) if (S.cols[k][id] > 0) all.push(SETS[k].CARD[id]);
+  all.sort((a, b) => b.value - a.value);
+  const top = all.slice(0, 24);
+  $('#showroom').innerHTML = top.length ? `<div class="showGrid">${top.map(c => `<button class="showItem" data-id="${c.id}" data-s="${c.set}">
+      <div class="showCard" style="--ar:${faceAR(c)}">${frontHTML(c)}</div>
+      <b>${esc(c.name)}</b><span>${SETS[c.set].name} · ${c.sport ? c.vname : SETS[c.set].RAR[c.r].name}</span><em>${money(c.value)}</em></button>`).join('')}</div>`
+    : `<div class="empty">Your best pulls will be displayed here. Rip a pack!</div>`;
+  document.querySelectorAll('#showroom .showItem').forEach(b => b.onclick = () => showCard(+b.dataset.id, b.dataset.s));
 }
-function renderHub(){
-  const el = $('#hubSets'); if (!el) return;
-  const sub = {taloki:'Astral Beasts', nfl:'Football · 2026', nba:'Basketball · 2026-27'};
-  el.innerHTML = ['taloki','nfl','nba'].map(id => { const T = SETS[id], col = S.cols[id], own = Object.keys(col).filter(k => col[k] > 0).length;
-    return `<button class="hubTile ht-${id}" data-set="${id}">
-      <div class="htText"><span class="htName">${T.name}</span><span class="htSub">${sub[id]}</span>
-        <span class="htStats"><b>${own}/${T.CARDS.length}</b> cards · <b>${money(colValue(id))}</b></span>
-        <span class="htGo">Open packs →</span></div>
-      ${hubFan(id)}</button>`; }).join('');
-  el.querySelectorAll('.hubTile').forEach(b => b.onclick = () => enterSet(b.dataset.set));
-  $('#hubStats').innerHTML = `
-    <div class="stat"><b>${money(S.bal)}</b><span>Balance</span></div>
-    <div class="stat"><b>${money(totalValue())}</b><span>Collection</span></div>
-    <div class="stat"><b>${(S.opened || 0).toLocaleString('en-US')}</b><span>Packs</span></div>`;
+/* ---- pull history ---- */
+function renderHistory(){
+  const hist = S.history || [];
+  $('#history').innerHTML = hist.length ? `<div class="histList">${hist.slice(0, 100).map(h => { const sid = h.s || 'taloki', c = cardOf(sid, h.c), p = c && SETS[sid].PACKS.find(x => x.id === h.p); if (!c) return '';
+      return `<div class="histRow" data-id="${c.id}" data-s="${sid}"><i class="hdot" style="--c:${TIERS[h.b] ? TIERS[h.b].rgb : '154,163,178'}"></i>
+        <div class="hMain"><b>${esc(c.name)}${c.sport ? ' <small>' + c.vname + '</small>' : ''}</b><span>${SETS[sid].name} · ${p ? p.name : 'Pack'}${h.m && h.m !== 'normal' ? ' · ' + (MODES[h.m] ? MODES[h.m].name : h.m) : ''}${h.g ? ' · Boost' : ''} · ${new Date(h.t).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})}</span></div>
+        <b class="hVal">${money(c.value)}</b></div>`; }).join('')}</div>` : `<div class="empty">Your pulls will show up here.</div>`;
+  document.querySelectorAll('#history [data-id]').forEach(r => r.onclick = () => { if (S.cols[r.dataset.s][r.dataset.id]) showCard(+r.dataset.id, r.dataset.s); });
 }
+
 /* ---- add any amount of play money ---- */
 function addMoney(v){
   v = Math.round(v * 100) / 100;
   if (!(v > 0) || v > 100000) { toast('Enter an amount from $0.01 to $100,000'); return false; }
   S.bal = Math.round((S.bal + v) * 100) / 100; S.added = Math.round(((S.added || 0) + v) * 100) / 100;
-  save(); renderBal(); renderProfile(); renderHub(); toast(`Added ${money(v)} play money`); return true;
+  save(); renderBal(); renderProfile(); toast(`Added ${money(v)} play money`); return true;
 }
 function openAddMoney(){
   $('#sheet').innerHTML = `<h3>Add play money</h3>
@@ -643,17 +700,18 @@ function openAddMoney(){
 }
 $('#addFunds').onclick = openAddMoney;
 
-/* ---- profile / history ---- */
+/* ---- account ---- */
 function renderProfile(){
   const el = $('#profile'); if (!el) return;
-  const best = bestCard(), hist = S.history || [];
+  const best = bestCard();
   el.innerHTML = `
+    <div class="acHead"><img src="images/brand/pax-logo.webp" alt="PAX"><div><b>PAX</b><span>Play money only</span></div></div>
     <div class="statrow">
       <div class="stat"><b>${money(S.bal)}</b><span>Balance</span></div>
+      <div class="stat"><b>${money(totalValue())}</b><span>Collection value</span></div>
       <div class="stat"><b>${money(S.added || 0)}</b><span>Money added</span></div>
       <div class="stat"><b>${money(S.spent || 0)}</b><span>Spent on packs</span></div>
       <div class="stat"><b>${money(S.earned || 0)}</b><span>Earned from selling</span></div>
-      <div class="stat"><b>${money(totalValue())}</b><span>Collection value</span></div>
       <div class="stat"><b>${(S.opened || 0).toLocaleString('en-US')}</b><span>Packs opened</span></div>
     </div>
     <h2>Best pull</h2>
@@ -661,21 +719,16 @@ function renderProfile(){
       <div><b>${esc(best.name)}</b><div class="meta">${SETS[best.set].name} · ${best.sport ? best.vname : SETS[best.set].RAR[best.r].name} · #${best.num}</div><div class="bpVal">${money(best.value)}</div></div></div>`
       : `<div class="empty">No pulls yet. Rip a pack!</div>`}
     <div class="actions"><button class="buy" id="profAdd" style="width:auto">Add money</button></div>
-    <h2>Pull history</h2>
-    ${hist.length ? `<div class="histList">${hist.slice(0, 100).map(h => { const sid = h.s || 'taloki', c = cardOf(sid, h.c), p = c && SETS[sid].PACKS.find(x => x.id === h.p); if (!c) return '';
-      return `<div class="histRow" data-id="${c.id}" data-s="${sid}"><i class="hdot" style="--c:${TIERS[h.b] ? TIERS[h.b].rgb : '154,163,178'}"></i>
-        <div class="hMain"><b>${esc(c.name)}${c.sport ? ' <small>' + c.vname + '</small>' : ''}</b><span>${SETS[sid].name} · ${p ? p.name : 'Pack'}${h.m === 'high' ? ' · High' : ''}${h.g ? ' · Boost' : ''} · ${new Date(h.t).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})}</span></div>
-        <b class="hVal">${money(c.value)}</b></div>`; }).join('')}</div>` : `<div class="empty">Your pulls will show up here.</div>`}
     <h2>Settings</h2>
     <div class="actions"><button class="ghost" id="resetAll">Reset balance, collection and history</button></div>`;
   $('#profAdd').onclick = openAddMoney;
-  document.querySelectorAll('#profile [data-id]').forEach(r => r.onclick = () => { if (S.cols[r.dataset.s][r.dataset.id]) showCard(+r.dataset.id, r.dataset.s); });
+  const bp = el.querySelector('.bestPull'); if (bp) bp.onclick = () => { if (S.cols[bp.dataset.s][bp.dataset.id]) showCard(+bp.dataset.id, bp.dataset.s); };
   $('#resetAll').onclick = () => { if (!confirm('Reset everything? Your balance goes back to $50 and your collection and history are cleared.')) return;
-    S = Object.assign(fresh(), {v:3, vol:S.vol, hideInstall:S.hideInstall, set:S.set}); COL = S.cols[G.id];
-    save(); renderBal(); renderPacks(); renderOdds(); renderCol(); renderProfile(); renderHub(); toast('Everything was reset'); };
+    S = Object.assign(fresh(), {v:3, vol:S.vol, hideInstall:S.hideInstall, set:S.set, pi:S.pi}); COL = S.cols[G.id];
+    save(); renderBal(); renderPackInfo(); renderCol(); renderProfile(); toast('Everything was reset'); };
 }
-$('#heroEyebrow').textContent = G.eyebrow; $('#heroTitle').innerHTML = G.headline;
-renderPacks(); renderOdds(); renderCol(); renderProfile(); goHub();
+applySet(G.id); showView('packs');
+setTimeout(() => { const sp = $('#splash'); if (sp) { sp.classList.add('out'); setTimeout(() => sp.remove(), 600); } }, RM() ? 0 : 900);
 
 /* ============ FULL-SCREEN / INSTALL ============ */
 (function(){
