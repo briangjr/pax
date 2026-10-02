@@ -19,33 +19,38 @@
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+<div class="splash" id="splash"><img src="images/brand/pax-logo.webp" alt="PAX"></div>
 <div class="appFrame">
 <header class="top">
-  <button class="backHub" id="backHub" aria-label="Back to PAX home"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg><span>PAX</span></button>
-  <div class="logo" id="logo"><img class="paxIcon" src="images/brand/pax-logo.webp" alt=""><span class="paxWord">PAX</span></div>
-  <div class="wallet"><div class="bal" id="bal">$0.00</div><button class="add" id="addFunds" aria-label="Add play money">+</button></div>
+  <div class="catWrap">
+    <button class="catBtn" id="catBtn" aria-haspopup="true"><span class="ci" id="catIco"></span><span id="catName">Taloki</span><svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+    <div class="catMenu" id="catMenu" hidden></div>
+  </div>
+  <div class="wallet"><div class="bal" id="bal">$0.00</div><button class="add" id="addFunds" aria-label="Add play money"><span>+</span></button></div>
 </header>
 
 <main>
-  <section class="view on" id="v-hub">
-    <div class="hubHero">
-      <div class="hubMark"><img class="hubLogo" src="images/brand/pax-logo.webp" alt="PAX"></div>
-      <p class="hubTag">Rip packs. Pull legends. Play money only.</p>
+  <section class="view on" id="v-packs">
+    <div class="pkStage">
+      <div class="pkCar" id="pkCar"></div>
+      <div class="pkLoad" id="pkLoad"></div>
     </div>
-    <div class="statrow hubStats" id="hubStats"></div>
-    <h2 class="hubH">Choose your packs</h2>
-    <div class="hubSets" id="hubSets"></div>
-    <div class="actions hubActions"><button class="ghost" id="hubMe">Profile &amp; pull history</button></div>
+    <div class="pkInfo">
+      <h2 class="pkTitle" id="pkTitle"></h2>
+      <button class="insideBtn" id="insideBtn"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>What's inside</button>
+      <div class="pkStats">
+        <div class="psL"><span>Min Value</span><b id="pkMin"></b></div>
+        <div class="psC"><span>Max Pull</span><b id="pkMax"></b></div>
+        <button class="psR" id="styleBtn"><span>Pack style</span><b><em id="pkStyle">Normal</em><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></b></button>
+      </div>
+      <button class="buyBig" id="buyBtn">Buy</button>
+    </div>
   </section>
 
-  <section class="view" id="v-packs">
-    <div class="hero">
-      <span class="eyebrow" id="heroEyebrow"></span>
-      <h1 id="heroTitle"></h1>
-      <p class="sub">Play money only. Published odds on every pack. Keep your pulls or sell them back at 90% of card value.</p>
-    </div>
-    <div class="volBox" id="volPacks"></div>
-    <div class="packs" id="packList"></div>
+  <section class="view" id="v-show">
+    <h1>Showroom</h1>
+    <p class="sub">Your best pulls across Taloki, NFL and NBA.</p>
+    <div id="showroom"></div>
   </section>
 
   <section class="view" id="v-col">
@@ -68,18 +73,14 @@
     </div>
   </section>
 
-  <section class="view" id="v-odds">
-    <h1>Odds</h1>
-    <p class="sub">Every pack gives one card. These are the chances of each payout tier, and the pack's average card value compared to its price.</p>
-    <div class="volBox" id="volOdds"></div>
-    <div class="volBox" id="oddsBoost"></div>
-    <div id="oddsList"></div>
-    <h2>Card values</h2>
-    <div class="oddsCard"><div class="tbl"><table id="valTable"></table></div></div>
+  <section class="view" id="v-hist">
+    <h1>History</h1>
+    <p class="sub">Your last 100 pulls.</p>
+    <div id="history"></div>
   </section>
+
   <section class="view" id="v-me">
-    <h1>Profile</h1>
-    <p class="sub">Your play-money totals, best pull and every pack you've opened.</p>
+    <h1>Account</h1>
     <div id="profile"></div>
   </section>
 </main>
@@ -87,13 +88,15 @@
 <div class="installBar" id="installBar" hidden></div>
 
 <nav class="nav">
-  <button class="on" data-v="packs"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M5 7h14M9 12l3-2 3 2-3 5z"/></svg><span>Packs</span></button>
-  <button data-v="col"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7.5" height="9" rx="1.8"/><rect x="13.5" y="3" width="7.5" height="9" rx="1.8"/><rect x="3" y="15" width="7.5" height="6" rx="1.8"/><rect x="13.5" y="15" width="7.5" height="6" rx="1.8"/></svg><span>Collection</span></button>
-  <button data-v="odds"><svg viewBox="0 0 24 24"><path d="M4 20h16"/><rect x="5.5" y="11" width="3" height="6" rx="1"/><rect x="10.5" y="7" width="3" height="10" rx="1"/><rect x="15.5" y="4" width="3" height="13" rx="1"/></svg><span>Odds</span></button>
-  <button data-v="me"><svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="4"/><path d="M4.5 20c1.4-3.6 4.2-5.5 7.5-5.5s6.1 1.9 7.5 5.5"/></svg><span>Profile</span></button>
+  <button class="on" data-v="packs"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="11" height="16" rx="2"/><path d="M8 3h9a2 2 0 0 1 2 2v13"/></svg><span>Packs</span></button>
+  <button data-v="show"><svg viewBox="0 0 24 24"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0z"/><path d="M5 13v7h14v-7"/><path d="M10 20v-4h4v4"/></svg><span>Showroom</span></button>
+  <button data-v="col"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="4.5" height="4.5" rx="1"/><rect x="9.75" y="3.5" width="4.5" height="4.5" rx="1"/><rect x="16" y="3.5" width="4.5" height="4.5" rx="1"/><rect x="3.5" y="9.75" width="4.5" height="4.5" rx="1"/><rect x="9.75" y="9.75" width="4.5" height="4.5" rx="1"/><rect x="16" y="9.75" width="4.5" height="4.5" rx="1"/><rect x="3.5" y="16" width="4.5" height="4.5" rx="1"/><rect x="9.75" y="16" width="4.5" height="4.5" rx="1"/><rect x="16" y="16" width="4.5" height="4.5" rx="1"/></svg><span>Collection</span></button>
+  <button data-v="hist"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span>History</span></button>
+  <button data-v="me"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="3.2"/><path d="M6.2 18.4c1.3-2.3 3.4-3.4 5.8-3.4s4.5 1.1 5.8 3.4"/></svg><span>Account</span></button>
 </nav>
 </div>
 
+<div class="bs" id="bs"><div class="bsIn" id="bsIn"></div></div>
 <div class="stage" id="stage" aria-live="polite"></div>
 <div class="burst" id="burst"></div>
 <div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>

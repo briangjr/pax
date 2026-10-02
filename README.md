@@ -8,11 +8,22 @@ Rip packs. Pull legends. A play-money card pack opener with three sections, all 
 
 No real money is involved anywhere.
 
-## PAX home
+## Layout
 
-The app opens on the PAX home screen (black, silver and white): your balance, total collection value, packs opened, and one tile per section. Tap a tile to go into that section; the **‹ PAX** button at the top left comes back home. Packs, Collection and Odds belong to the section you're in. The wallet, Profile and pull history are shared across all three.
+PAX opens on the **Packs** screen:
 
-Saves from the Taloki-only version carry over automatically (balance, cards, history).
+- **Top left:** category menu to switch between Taloki, NFL and NBA (a short "Loading packs" moment plays when you switch).
+- **Top right:** your balance and the green **+** to add play money. One wallet is shared by all three sections.
+- **Center:** swipe through the seven packs. Under the pack: its name, **What's inside** (every card it can give, its value and its exact chance), Min Value, Max Pull and **Pack style**.
+- **Pack style** opens a sheet: Normal, High, Max or 50/50, the estimated payout odds for that pack, Gold Boost (Normal and High only), then **Apply**.
+- **Buy for $X** opens the pack. The header and tab bar disappear while a pack is opening.
+- **Bottom tabs:** Packs, Showroom (your best cards across all sections), Collection (for the section you're in), History (last 100 pulls), Account (totals, add money, reset).
+
+Saves from the Taloki-only version carry over automatically (balance, cards, history) when deployed to the same site.
+
+### Nothing gives the pull away early
+
+The pack looks the same whatever is inside. The mystery card always spins the same number of turns for the same length of time, and each turn shows a random color (any tier, in any order), so it only lands on the real color at the very end. Every card, graded or raw, hides under the same card-shaped cover until you peel it.
 
 ## NFL and NBA sets
 
@@ -65,7 +76,7 @@ netlify.toml            Netlify settings and caching
 css/styles.css          all styling
 js/data.js              Taloki set: cards, values, tiers, packs, odds
 js/sports.js            NFL and NBA sets: players, teams, versions, pack looks
-js/app.js               PAX home, wallet, collections, pack-opening flow
+js/app.js               pack screen, wallet, collections, pack-opening flow
 images/brand/           Taloki card backs and eye, PAX app icons
 images/cards/           Taloki card art, named <number>-<name>.webp
 images/nfl/, images/nba/  your pack covers and player photos
@@ -87,7 +98,7 @@ Five packs, one card each. Every card has one fixed value; the pack decides whic
 
 For the $1–$25 packs, the jackpot is a chance at an Ascended, Apex or Mythic Legend card and lives inside the Gold tier. The $100 and $500 packs cost enough that those cards sit in their regular tiers, so those two packs use their own dollar ranges (see `js/data.js`).
 
-**Pack style (volatility)** is picked on the Packs or Odds tab and applies to every pack:
+**Pack style** is picked from the Pack style sheet on the Packs screen and applies to every pack. Normal and High:
 
 | Tier | Normal: value (× price) | Normal: chance | High: value (× price) | High: chance |
 |---|---|---|---|---|
@@ -98,9 +109,12 @@ For the $1–$25 packs, the jackpot is a chance at an Ascended, Apex or Mythic L
 | Red | 1.80–2.60× | 5% | 1.40–1.80× | 4.4% |
 | Gold | 2.60×+ | 3% | 1.80×+ | 12.5% |
 
-Blue is always a small profit. Every pack averages 92% of its price in both styles; High just swings wider. Selling a card back pays 90% of its value. All odds are in `js/data.js`.
+**Max:** 90% a low card (0.10–0.35× the price), 10% a card worth 4× the price or more.
+**50/50:** 50% a low card, 50% a card worth about 1.5–2× the price.
 
-**Gold Boost:** every pack has a Gold Boost button. It costs 2× the pack price and makes Gold 25% of pulls (the jackpot also doubles). The other tiers shrink to make room, and Gold leans toward its cheaper cards, so a boosted pack still averages 92% of what you paid. The Odds tab has a Standard / Gold Boost switch.
+Blue is always a small profit. Every pack averages 92% of its price in every style; the styles just change how wide the swings are. Selling a card back pays 90% of its value. All odds are in `js/data.js`.
+
+**Gold Boost:** every pack has a Gold Boost button. It costs 2× the pack price and makes Gold 25% of pulls (the jackpot also doubles). The other tiers shrink to make room, and Gold leans toward its cheaper cards, so a boosted pack still averages 92% of what you paid. The Pack style sheet shows the boosted odds when Gold Boost is switched on.
 
 **Opening flow:** pick one of six looping packs → swipe across the top to cut it open → a mystery card spins and changes color up to your tier (tap to speed up) → peel the cover off by dragging, or tap to open → result screen with a 3D card you can tilt and flip, then Sell or Keep.
 

@@ -1,7 +1,7 @@
 /* PAX offline support.
    Everything the game needs is saved on the device the first time it loads online,
    so after that it runs with no connection. VERSION changes whenever the files change. */
-const VERSION = 'pax-9576d919b5';
+const VERSION = 'pax-179fc2d43d';
 const FILES = [
   "./",
   "css/styles.css",
