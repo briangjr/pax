@@ -753,3 +753,10 @@ body[data-set="nfl"] .stage.resMode,body[data-set="nba"] .stage.resMode{backgrou
 .htText{max-width:56%}
 .htSub{line-height:1.3}
 .ht-nba{background:radial-gradient(120% 140% at 100% 0%,#6E747D 0%,#2A2C31 40%,#0A0A0C 75%,#000 100%)}
+/* v8: PAX logo */
+.paxIcon{width:32px;height:32px;border-radius:8px;box-shadow:0 0 0 1px rgba(255,255,255,.18),0 6px 16px -6px rgba(255,255,255,.35)}
+.hubHero{padding-top:18px}
+.hubLogo{width:min(56vw,220px);aspect-ratio:1;border-radius:22.5%;display:block;
+  box-shadow:0 0 0 1px rgba(255,255,255,.22),0 24px 60px -18px rgba(255,255,255,.28),0 30px 80px -30px rgba(0,0,0,.9);animation:floaty 4s ease-in-out infinite}
+.pxMark{background:#000}
+.pxMark img{width:100%;border-radius:50%}
