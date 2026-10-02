@@ -3,33 +3,45 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Taloki</title>
-<meta name="description" content="Taloki: rip packs, chase legends. A play-money trading card pack opener.">
-<meta name="theme-color" content="#0A1233">
+<title>PAX</title>
+<meta name="description" content="PAX: rip packs of Taloki, football and basketball cards. Play money only.">
+<meta name="theme-color" content="#000000">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Taloki">
-<link rel="icon" type="image/png" href="images/brand/favicon-64.png">
-<link rel="apple-touch-icon" sizes="180x180" href="images/brand/app-icon-180.png">
+<meta name="apple-mobile-web-app-title" content="PAX">
+<link rel="icon" type="image/png" href="images/brand/pax-favicon-64.png">
+<link rel="apple-touch-icon" sizes="180x180" href="images/brand/pax-app-icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Chakra+Petch:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Chakra+Petch:wght@600;700&family=Anton&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 <div class="appFrame">
 <header class="top">
-  <div class="logo"><img class="eye" src="images/brand/logo-eye.png" alt="">Taloki</div>
+  <button class="backHub" id="backHub" aria-label="Back to PAX home"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg><span>PAX</span></button>
+  <div class="logo" id="logo"><span class="paxWord">PAX</span></div>
   <div class="wallet"><div class="bal" id="bal">$0.00</div><button class="add" id="addFunds" aria-label="Add play money">+</button></div>
 </header>
 
 <main>
-  <section class="view on" id="v-packs">
+  <section class="view on" id="v-hub">
+    <div class="hubHero">
+      <div class="hubMark"><span class="paxWord big">PAX</span></div>
+      <p class="hubTag">Rip packs. Pull legends. Play money only.</p>
+    </div>
+    <div class="statrow hubStats" id="hubStats"></div>
+    <h2 class="hubH">Choose your packs</h2>
+    <div class="hubSets" id="hubSets"></div>
+    <div class="actions hubActions"><button class="ghost" id="hubMe">Profile &amp; pull history</button></div>
+  </section>
+
+  <section class="view" id="v-packs">
     <div class="hero">
-      <span class="eyebrow">Astral Beasts · Series I</span>
-      <h1>Rip packs.<br>Chase the legends.</h1>
+      <span class="eyebrow" id="heroEyebrow"></span>
+      <h1 id="heroTitle"></h1>
       <p class="sub">Play money only. Published odds on every pack. Keep your pulls or sell them back at 90% of card value.</p>
     </div>
     <div class="volBox" id="volPacks"></div>
@@ -45,12 +57,12 @@
     </div>
     <div class="seg colSeg" id="colSeg"><button data-cv="cards" class="on">Cards</button><button data-cv="evo">Evolutions</button></div>
     <div id="cvCards">
-      <h2>Astral Beasts set</h2>
+      <h2 id="colSetName">Set</h2>
       <div class="chips" id="chips"></div>
       <div class="grid" id="colGrid"></div>
     </div>
     <div id="cvEvo" hidden>
-      <h2>Evolution lines</h2>
+      <h2 id="altTitle">Evolution lines</h2>
       <p class="sub" id="evoSum"></p>
       <div id="evoList"></div>
     </div>
@@ -87,6 +99,7 @@
 <div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
 <div class="toast" id="toast"></div>
 <script src="js/data.js"></script>
+<script src="js/sports.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

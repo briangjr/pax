@@ -1,7 +1,7 @@
-/* Taloki offline support.
+/* PAX offline support.
    Everything the game needs is saved on the device the first time it loads online,
    so after that it runs with no connection. VERSION changes whenever the files change. */
-const VERSION = 'taloki-17b2c5350e';
+const VERSION = 'pax-b65eb49b20';
 const FILES = [
   "./",
   "css/styles.css",
@@ -15,6 +15,12 @@ const FILES = [
   "images/brand/eye.webp",
   "images/brand/favicon-64.png",
   "images/brand/logo-eye.png",
+  "images/brand/pax-app-icon-1024.png",
+  "images/brand/pax-app-icon-180.png",
+  "images/brand/pax-app-icon-192.png",
+  "images/brand/pax-app-icon-512.png",
+  "images/brand/pax-app-icon-maskable-512.png",
+  "images/brand/pax-favicon-64.png",
   "images/cards/001-thundrake.webp",
   "images/cards/002-aquarion.webp",
   "images/cards/003-knoxara.webp",
@@ -99,9 +105,10 @@ const FILES = [
   "index.html",
   "js/app.js",
   "js/data.js",
+  "js/sports.js",
   "manifest.webmanifest"
 ];
-const FONT_CACHE = 'taloki-fonts';
+const FONT_CACHE = 'pax-fonts';
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
