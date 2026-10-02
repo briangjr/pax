@@ -84,7 +84,7 @@ function cardHTML(c, qty){
 }
 const lockedHTML = c => `<div class="card locked${c.sport ? ' spLocked' : ''}"><div class="in">#${c.num}</div></div>`;
 const graded = c => c.sport ? !!c.grade : !!(c.slab && !c.slab.raw);
-const markHTML = () => G.sport ? '<span class="mEye pxMark"><b>PAX</b></span>' : '<span class="mEye"><img src="images/brand/eye.webp" alt=""></span>';
+const markHTML = () => G.sport ? '<span class="mEye pxMark"><img src="images/brand/pax-logo.webp" alt=""></span>' : '<span class="mEye"><img src="images/brand/eye.webp" alt=""></span>';
 function packHTML(p){
   const cover = p.cover ? `;--packimg:url('${p.cover}')` : '';
   return `<div class="pack${G.sport ? ' sp' : ''}${p.cover ? ' hasCover' : ''}" style="--pk:${p.pk};--glow:${p.glow}${cover}"><div class="tearTop"></div><span class="ptint"></span>
@@ -589,7 +589,7 @@ function setMode(mode){   // 'hub' = PAX home, 'set' = inside Taloki / NFL / NBA
   document.body.dataset.set = mode === 'set' ? G.id : '';
   const logo = $('#logo');
   if (mode === 'set') logo.innerHTML = (G.sport ? `<span class="secIco">${ICON[G.sport]}</span>` : '<img class="eye" src="images/brand/logo-eye.png" alt="">') + `<span>${G.name}</span>`;
-  else logo.innerHTML = '<span class="paxWord">PAX</span>';
+  else logo.innerHTML = '<img class="paxIcon" src="images/brand/pax-logo.webp" alt=""><span class="paxWord">PAX</span>';
 }
 function enterSet(id){
   G = SETS[id]; COL = S.cols[id]; S.set = id; save();
