@@ -1,7 +1,7 @@
 /* PAX offline support.
    Everything the game needs is saved on the device the first time it loads online,
    so after that it runs with no connection. VERSION changes whenever the files change. */
-const VERSION = 'pax-b65eb49b20';
+const VERSION = 'pax-9576d919b5';
 const FILES = [
   "./",
   "css/styles.css",
@@ -21,6 +21,7 @@ const FILES = [
   "images/brand/pax-app-icon-512.png",
   "images/brand/pax-app-icon-maskable-512.png",
   "images/brand/pax-favicon-64.png",
+  "images/brand/pax-logo.webp",
   "images/cards/001-thundrake.webp",
   "images/cards/002-aquarion.webp",
   "images/cards/003-knoxara.webp",

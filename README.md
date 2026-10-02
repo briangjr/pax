@@ -38,7 +38,7 @@ Rosters reflect the 2026 offseason (including 2026 draft rookies, marked RC). Pl
 
 - **Pack covers:** put the image in `images/nfl/packs/` or `images/nba/packs/`, then add `cover:'images/nfl/packs/rookie.webp'` to that pack in `SPORT_PACKS` in `js/sports.js`. A pack with a cover shows your art instead of the built-in design.
 - **Player photos:** put the image in `images/nfl/players/` or `images/nba/players/` and add `'Patrick Mahomes': 'images/nfl/players/patrick-mahomes.webp'` to `NFL_ART` (or `NBA_ART`). Every card of that player uses the photo.
-- **PAX logo:** the PAX wordmark and app icons (`images/brand/pax-*.png`) are placeholders until the real logo is in.
+- **PAX logo:** `images/brand/pax-logo.webp` (home screen, top bar, mystery card) and the app icons `images/brand/pax-app-icon-*.png` are all made from the PAX logo.
 
 No official league or team logos are used.
 
