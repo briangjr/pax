@@ -336,3 +336,15 @@ const BOOST = {
   }
 };
 PACKS.forEach(p => ['normal', 'high'].forEach(m => { p[m].boost = BOOST[p.id][m]; }));
+
+/* ============ PAX SET REGISTRY ============
+   Each section of PAX (Taloki, NFL, NBA) is a "set" with its own cards and packs.
+   All sets share the payout tiers (TIERS), pack styles (MODES) and the one PAX wallet. */
+const SETS = {};
+CARDS.forEach(c => { c.set = 'taloki'; });
+SETS.taloki = {
+  id:'taloki', name:'Taloki', setName:'Astral Beasts', eyebrow:'Astral Beasts · Series I',
+  headline:'Rip packs.<br>Chase the legends.', packLabel:'Astral Beasts', chaseLabel:'Ascended+',
+  chaseNames:'Ascended, Apex and Mythic Legend', altView:'Evolutions', sport:false,
+  RAR, ORDER, CARDS, BY, CARD, PACKS, GRADE
+};
