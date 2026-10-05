@@ -136,7 +136,18 @@ const NFL_PHOTO_CARDS = [
   {name:"Carnell Tate", pos:'WR', team:'TEN', rc:1, r:'E', value:190, run:50, vname:'Prizm Blue', auto:0, patch:0, img:{"src": "images/nfl/cards/carnell-tate-prizm-blue-50.webp", "ar": 0.66667, "ser": [73.78, 74.41, 3.42, "gold tight"]}},
   {name:"Jalen Hurts", pos:'QB', team:'PHI', rc:0, r:'E', value:175, run:50, vname:'Prizm Blue', auto:0, patch:0, img:{"src": "images/nfl/cards/jalen-hurts-prizm-blue-50.webp", "ar": 0.66667, "ser": [73.78, 74.51, 3.52, "gold tight"]}},
   {name:"Justin Herbert", pos:'QB', team:'LAC', rc:0, r:'E', value:160, run:50, vname:'Prizm Blue', auto:0, patch:0, img:{"src": "images/nfl/cards/justin-herbert-prizm-blue-50.webp", "ar": 0.66667, "ser": [74.22, 74.48, 3.32, "gold tight"]}},
-  {name:"KC Concepcion", pos:'WR', team:'CLE', rc:1, r:'E', value:140, run:50, vname:'Prizm Blue', auto:0, patch:0, img:{"src": "images/nfl/cards/kc-concepcion-prizm-blue-50.webp", "ar": 0.66667, "ser": [73.93, 74.48, 3.32, "gold tight"]}}
+  {name:"KC Concepcion", pos:'WR', team:'CLE', rc:1, r:'E', value:140, run:50, vname:'Prizm Blue', auto:0, patch:0, img:{"src": "images/nfl/cards/kc-concepcion-prizm-blue-50.webp", "ar": 0.66667, "ser": [73.93, 74.48, 3.32, "gold tight"]}},
+  {name:"Christian McCaffrey", pos:'RB', team:'SF', rc:0, r:'E', value:180, run:50, vname:'Prizm Blue', auto:0, patch:0, img:{"src": "images/nfl/cards/christian-mccaffrey-prizm-blue-50.webp", "ar": 0.66667, "ser": [73.78, 74.51, 3.32, "gold tight"]}},
+  {name:"Micah Parsons", pos:'EDGE', team:'GB', rc:0, r:'E', value:165, run:50, vname:'Prizm Blue', auto:0, patch:0, img:{"src": "images/nfl/cards/micah-parsons-prizm-blue-50.webp", "ar": 0.66667, "ser": [73.78, 74.41, 3.32, "gold tight"]}},
+  {name:"Brian Thomas Jr.", pos:'WR', team:'JAX', rc:0, r:'E', value:150, run:50, vname:'Prizm Blue', auto:0, patch:0, img:{"src": "images/nfl/cards/brian-thomas-jr-prizm-blue-50.webp", "ar": 0.66667, "ser": [73.78, 74.41, 3.42, "gold tight"]}},
+  {name:"Brock Purdy", pos:'QB', team:'SF', rc:0, r:'E', value:130, run:50, vname:'Prizm Blue', auto:0, patch:0, img:{"src": "images/nfl/cards/brock-purdy-prizm-blue-50.webp", "ar": 0.66667, "ser": [74.17, 74.48, 3.32, "gold tight"]}},
+  {name:"Patrick Surtain II", pos:'CB', team:'DEN', rc:0, r:'E', value:120, run:50, vname:'Prizm Blue', auto:0, patch:0, img:{"src": "images/nfl/cards/patrick-surtain-ii-prizm-blue-50.webp", "ar": 0.66667, "ser": [73.78, 74.41, 3.22, "gold tight"]}},
+  {name:"Patrick Mahomes", pos:'QB', team:'KC', rc:0, r:'C', value:2.25, vname:'Topps Base', auto:0, patch:0, img:{"src": "images/nfl/cards/patrick-mahomes-topps-base.webp", "ar": 0.66667, "raw": true}},
+  {name:"Justin Jefferson", pos:'WR', team:'MIN', rc:0, r:'C', value:1.85, vname:'Topps Base', auto:0, patch:0, img:{"src": "images/nfl/cards/justin-jefferson-topps-base.webp", "ar": 0.66667, "raw": true}},
+  {name:"Saquon Barkley", pos:'RB', team:'PHI', rc:0, r:'C', value:1.45, vname:'Topps Base', auto:0, patch:0, img:{"src": "images/nfl/cards/saquon-barkley-topps-base.webp", "ar": 0.66667, "raw": true}},
+  {name:"Brock Bowers", pos:'TE', team:'LV', rc:0, r:'C', value:1.35, vname:'Topps Base', auto:0, patch:0, img:{"src": "images/nfl/cards/brock-bowers-topps-base.webp", "ar": 0.66667, "raw": true}},
+  {name:"Amon-Ra St. Brown", pos:'WR', team:'DET', rc:0, r:'C', value:1.2, vname:'Topps Base', auto:0, patch:0, img:{"src": "images/nfl/cards/amon-ra-st-brown-topps-base.webp", "ar": 0.66667, "raw": true}},
+  {name:"C.J. Stroud", pos:'QB', team:'HOU', rc:0, r:'C', value:1.1, vname:'Topps Base', auto:0, patch:0, img:{"src": "images/nfl/cards/cj-stroud-topps-base.webp", "ar": 0.66667, "raw": true}}
 ];
 /* how often a card shows up compared with other cards in its tier: lower print run = rarer */
 const RUN_WEIGHT = run => run === 1 ? 0.01 : run <= 5 ? 0.15 : run <= 25 ? 0.4 : run <= 50 ? 0.6 : run === 0 ? 0.5 : 1;
@@ -168,7 +179,7 @@ function buildSportSet(id, cfg){
     if (!pl) { pl = {name: pc.name, pos: pc.pos, team: pc.team, rc: !!pc.rc, rank: P.length, c: TEAMS[id][pc.team] || ['#333','#999']}; P.push(pl); }
     const c = {id: ++cid, n: ++n, set:id, r: pc.r, name: pc.name, pos: pc.pos, team: pc.team, tc: pl.c, rc: !!pc.rc, rank: pl.rank,
       value: pc.value, sport: cfg.sport, auto: !!pc.auto, patch: !!pc.patch, vname: pc.vname, img: pc.img, photo: true,
-      w: RUN_WEIGHT(pc.run), el:{name: pc.team, icon:''}};
+      w: pc.run == null ? 1 : RUN_WEIGHT(pc.run), sp: pc.run === 0, el:{name: pc.team, icon:''}};
     if (pc.run) c.run = pc.run;
     CARDS.push(c); BY[pc.r].push(c); RAR[pc.r].count++;
   });

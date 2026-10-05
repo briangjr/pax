@@ -106,7 +106,7 @@ function cardHTML(c, qty, sn){
     </div></div>`;
 }
 const lockedHTML = c => `<div class="card locked${c.sport ? ' spLocked' : ''}"><div class="in">#${c.num}</div></div>`;
-const graded = c => c.img ? true : c.sport ? !!c.grade : !!(c.slab && !c.slab.raw);
+const graded = c => c.img ? !c.img.raw : c.sport ? !!c.grade : !!(c.slab && !c.slab.raw);
 const markHTML = () => G.sport ? '<span class="mEye pxMark"><img src="images/brand/pax-logo.webp" alt=""></span>' : '<span class="mEye"><img src="images/brand/eye.webp" alt=""></span>';
 /* Pack art: built in code, fancier with each tier (0 = cheapest, 6 = best). A pack with `cover` uses that image instead. */
 const SPARKS = n => Array.from({length:n}, (_, i) => `<i style="left:${(i * 37 + 11) % 90 + 5}%;top:${(i * 53 + 17) % 80 + 8}%;animation-delay:${(i * .37 % 2.4).toFixed(2)}s"></i>`).join('');
@@ -288,7 +288,7 @@ function openInside(){
   openBS(`<div class="ssHead"><div class="ssIco">${packHTML(p)}</div>
       <div class="ssTxt"><h3>What's inside</h3><p>${p.name} · ${MODES[m].name}${b ? ' + Gold Boost' : ''} · ${list.length} possible cards</p></div><button class="ssX" id="ssX" aria-label="Close">✕</button></div>
     <div class="wiList">${list.slice(0, SHOW).map(([c, q]) => `<div class="wiRow"><div class="wiCard">${cardHTML(c)}</div>
-      <div class="wiMain"><b>${esc(c.name)}</b><span>${c.sport ? c.vname + (c.run ? ' /' + c.run : c.photo ? ' · short print' : '') : G.RAR[c.r].name}${c.grade ? ' · ' + G.GRADE[c.grade] : ''}</span></div>
+      <div class="wiMain"><b>${esc(c.name)}</b><span>${c.sport ? c.vname + (c.run ? ' /' + c.run : c.sp ? ' · short print' : '') : G.RAR[c.r].name}${c.grade ? ' · ' + G.GRADE[c.grade] : ''}</span></div>
       <div class="wiVal"><b>${money(c.value)}</b><span>${q >= .5 ? pctTxt(q) : '1 in ' + Math.round(1 / q).toLocaleString('en-US')}</span></div></div>`).join('')}</div>
     ${list.length > SHOW ? `<p class="ssNote">+ ${list.length - SHOW} more cards from ${money(list[list.length - 1][0].value)} to ${money(list[SHOW][0].value)}.</p>` : ''}`);
   $('#ssX').onclick = closeBS;
@@ -751,7 +751,7 @@ function showPeel(){
 
 /* ---- 3D card viewer: drag to tilt, tap to flip and see the back ---- */
 function card3dHTML(c, sn){
-  const back = c.img ? `<div class="imgBack"><div class="imgBackCard">${pxBackHTML(c)}</div></div>` : c.sport ? (c.grade ? `<div class="pxSlab pxSlabBack"><div class="pxLbl pxLblBack"><b>PAX</b><span>Grading · Cert ${String(c.id * 7919 + 100000).slice(-8)}</span></div><div class="pxWin">${pxBackHTML(c, true)}</div></div>` : pxBackHTML(c))
+  const back = c.img && c.img.raw ? pxBackHTML(c) : c.img ? `<div class="imgBack"><div class="imgBackCard">${pxBackHTML(c)}</div></div>` : c.sport ? (c.grade ? `<div class="pxSlab pxSlabBack"><div class="pxLbl pxLblBack"><b>PAX</b><span>Grading · Cert ${String(c.id * 7919 + 100000).slice(-8)}</span></div><div class="pxWin">${pxBackHTML(c, true)}</div></div>` : pxBackHTML(c))
     : `<img src="${graded(c) ? 'images/brand/back-graded.webp' : 'images/brand/back.webp'}" alt="Card back">`;
   return `<div class="v3d${graded(c) ? ' isSlab' : ''}${c.sport ? ' isSp' : ''}" style="--ar:${faceAR(c)}"><div class="v3dIn">
     <div class="f3 front3">${frontHTML(c, sn)}<i class="glare"></i></div>
