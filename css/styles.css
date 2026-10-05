@@ -1114,3 +1114,6 @@ body[data-view="packs"] .toast{bottom:auto;top:calc(66px + env(safe-area-inset-t
 .evoSlot .imgCard,.grid .imgCard,.bpCard .imgCard{cursor:pointer}
 .imgSer.cream{color:#F1E7CF;filter:drop-shadow(0 .2cqw .4cqw rgba(0,0,0,.5))}
 .imgSer.tight{letter-spacing:.015em}
+.peelWrap.mini{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto;cursor:grab}
+.peelWrap.mini .pflapWrap{filter:drop-shadow(-3px 3px 4px rgba(0,0,0,.55))}
+.peelWrap.mini .mEye{width:38%}

@@ -606,20 +606,56 @@ function showMultiSpin(){
   SB().onclick = e => { if (e.target.id === 'skip') return; speed = Math.min(speed * 2.2, 8); };
   $('#skip').onclick = e => { e.stopPropagation(); done = true; showMultiResults(true); };
 }
+/* peel-back cover on any card: drag to peel, tap to open. Returns {open(ms)} to open it from code. */
+function attachPeel(pw, onOpen){
+  const pc = pw.querySelector('.pcover'), pf = pw.querySelector('.pflap');
+  let L = 0, sx, sy, drag = false, moved = false, opened = false, anim;
+  const W = () => pw.clientWidth, H = () => pw.clientHeight;
+  const setPeel = l => { L = l; const w = W(), h = H(), box = [[0,0],[w,0],[w,h],[0,h]];
+    const g = pt => (w - pt[0]) + pt[1] - L;
+    pc.style.clipPath = polyCSS(clipHalf(box, g));
+    pf.style.clipPath = polyCSS(clipHalf(box, pt => -g(pt)).map(([x, y]) => [w - L + y, L - w + x])); };
+  const animateTo = (target, ms, then) => { cancelAnimationFrame(anim); const from = L, t0 = performance.now();
+    const step = now => { const f = Math.min(1, (now - t0) / (RM() ? 1 : ms)), e = 1 - Math.pow(1 - f, 3);
+      setPeel(from + (target - from) * e); if (f < 1) anim = requestAnimationFrame(step); else if (then) then(); };
+    anim = requestAnimationFrame(step); };
+  const done = () => { pc.remove(); pf.parentElement.remove(); onOpen(); };
+  const open = (ms = 380) => { if (opened) return; opened = true; drag = false; animateTo(W() + H() + 40, ms, done); };
+  pw.addEventListener('pointerdown', e => { if (opened) return; e.stopPropagation(); drag = true; moved = false; sx = e.clientX; sy = e.clientY; pw.setPointerCapture(e.pointerId); cancelAnimationFrame(anim); });
+  pw.addEventListener('pointermove', e => { if (!drag) return; const dx = e.clientX - sx, dy = e.clientY - sy;
+    if (Math.abs(dx) + Math.abs(dy) > 5) moved = true; setPeel(Math.max(0, (Math.abs(dx) + Math.abs(dy)) * 0.9)); });
+  const up = () => { if (!drag) return; drag = false;
+    if (!moved) return open(320);
+    if (L > (W() + H()) * 0.3) open(260); else animateTo(0, 250); };
+  pw.addEventListener('pointerup', up); pw.addEventListener('pointercancel', up);
+  return {open, isOpen: () => opened};
+}
+/* every card has landed on its color: peel each one back on its own, tap it, or Reveal all */
 function revealPhase(){
-  const shown = new Set(), acts = $('#mActs');
-  const reveal = i => { if (shown.has(i)) return; shown.add(i);
+  const shown = new Set(), acts = $('#mActs'), peels = [];
+  const reveal = (i, quiet) => { if (shown.has(i)) return; shown.add(i);
     const pl = cur.pulls[i], c = pl.card, rgb = pullRGB(pl), slot = $('#mc' + i + ' .mSlot');
-    slot.innerHTML = `<div class="mFace zap" style="--tc:${rgb}"><div class="pfit" style="${fitStyle(faceAR(c))}">${frontHTML(c, pl.serial)}</div></div>`;
-    ring(rgb, slot); sparks(rgb, 22, slot, 140);
-    if ('APX'.includes(c.r)) flash(c.r);
-    $('#ml' + i).innerHTML = `<b style="--tc:${rgb}">${money(c.value)}</b><span>${esc(c.name)}</span>`;
+    slot.querySelector('.pfront').classList.add('zap');
+    ring(rgb, slot); sparks(rgb, quiet ? 10 : 22, slot, 140);
+    if (!quiet && 'APX'.includes(c.r)) flash(c.r);
+    $('#ml' + i).innerHTML = `<b style="--tc:${rgb}">${money(c.value)}</b><span>${esc(c.name)}${c.run ? ' · ' + serTxt(c, pl.serial) : ''}</span>`;
     if (shown.size === cur.n) { acts.innerHTML = '<button class="buy pickBtn" id="mCont">Continue</button>'; $('#spd').textContent = '';
       $('#mCont').onclick = () => showMultiResults(true); }
   };
-  cur.pulls.forEach((_, i) => { $('#mc' + i).onclick = () => reveal(i); });
+  cur.pulls.forEach((pl, i) => { const c = pl.card, rgb = pullRGB(pl), slot = $('#mc' + i + ' .mSlot');
+    slot.innerHTML = `<div class="peelWrap mini" style="--tc:${rgb}">
+      <div class="pfront"><div class="pfit" style="${fitStyle(faceAR(c))}">${frontHTML(c, pl.serial)}</div></div>
+      <div class="pcover mf${pl.jackpot ? ' rainbowBg' : ''}" style="--tc:${rgb}">${markHTML()}</div>
+      <div class="pflapWrap"><div class="pflap"></div></div></div>`;
+    peels[i] = attachPeel(slot.querySelector('.peelWrap'), () => reveal(i, revealingAll));
+  });
+  let revealingAll = false;
+  $('#spd').textContent = 'Peel back a card, or tap it to open';
   acts.innerHTML = '<button class="buy pickBtn" id="mAll">Reveal all</button>';
-  $('#mAll').onclick = () => cur.pulls.forEach((_, i) => setTimeout(() => reveal(i), RM() ? 0 : i * 160));
+  $('#mAll').onclick = () => { revealingAll = true; acts.innerHTML = '';
+    const best = cur.pulls.reduce((bi, pl, i) => 'APX'.includes(pl.card.r) && pl.card.value > (cur.pulls[bi] ? cur.pulls[bi].card.value : 0) ? i : bi, -1);
+    peels.forEach((pk, i) => setTimeout(() => pk.open(170), RM() ? 0 : i * 45));
+    if (best >= 0) setTimeout(() => flash(cur.pulls[best].card.r), RM() ? 0 : 260); };
   $('#skip').onclick = e => { e.stopPropagation(); showMultiResults(true); };
 }
 function showMultiResults(animate){

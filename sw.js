@@ -1,7 +1,7 @@
 /* PAX offline support.
    Everything the game needs is saved on the device the first time it loads online,
    so after that it runs with no connection. VERSION changes whenever the files change. */
-const VERSION = 'pax-776e0e2fe6';
+const VERSION = 'pax-5d62b43695';
 const FILES = [
   "./",
   "css/styles.css",
@@ -113,19 +113,24 @@ const FILES = [
   "images/nfl/cards/cam-ward-donruss-299.webp",
   "images/nfl/cards/cam-ward-downtown.webp",
   "images/nfl/cards/cam-ward-leaf-metal-auto-1of1.webp",
+  "images/nfl/cards/carnell-tate-prizm-blue-50.webp",
   "images/nfl/cards/ceedee-lamb-prizm-silver-99.webp",
   "images/nfl/cards/cj-stroud-prizm-silver-99.webp",
   "images/nfl/cards/derrick-henry-prestige-25.webp",
   "images/nfl/cards/drake-maye-prizm-silver-150.webp",
+  "images/nfl/cards/fernando-mendoza-prizm-blue-50.webp",
   "images/nfl/cards/garrett-wilson-prizm-silver-150.webp",
   "images/nfl/cards/jahmyr-gibbs-patch-auto-5.webp",
+  "images/nfl/cards/jalen-hurts-prizm-blue-50.webp",
   "images/nfl/cards/jamarr-chase-origins-auto-25.webp",
   "images/nfl/cards/jared-goff-prestige-25.webp",
   "images/nfl/cards/jaxon-smith-njigba-origins-auto-25.webp",
   "images/nfl/cards/jayden-daniels-origins-rookie-patch-75.webp",
   "images/nfl/cards/joe-burrow-prestige-25.webp",
   "images/nfl/cards/josh-allen-prestige-50.webp",
+  "images/nfl/cards/justin-herbert-prizm-blue-50.webp",
   "images/nfl/cards/justin-jefferson-prizm-gold-50.webp",
+  "images/nfl/cards/kc-concepcion-prizm-blue-50.webp",
   "images/nfl/cards/lamar-jackson-origins-auto-25.webp",
   "images/nfl/cards/malik-nabers-rookie-materials-50.webp",
   "images/nfl/cards/marvin-harrison-jr-prizm-silver-99.webp",

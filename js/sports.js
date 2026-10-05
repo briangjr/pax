@@ -131,7 +131,12 @@ const NFL_PHOTO_CARDS = [
   {name:"Drake Maye", pos:'QB', team:'NE', rc:1, r:'E', value:95, run:150, vname:'Prizm Silver', auto:0, patch:0, img:{"src": "images/nfl/cards/drake-maye-prizm-silver-150.webp", "ar": 0.66667, "ser": [72.85, 73.93, 3.4, "gold tight"]}},
   {name:"Amon-Ra St. Brown", pos:'WR', team:'DET', rc:0, r:'E', value:88, run:150, vname:'Prizm Silver', auto:0, patch:0, img:{"src": "images/nfl/cards/amon-ra-st-brown-prizm-silver-150.webp", "ar": 0.66667, "ser": [73.39, 73.93, 3.61, "gold tight"]}},
   {name:"Tyreek Hill", pos:'WR', team:'MIA', rc:0, r:'E', value:58, run:150, vname:'Prizm Silver', auto:0, patch:0, img:{"src": "images/nfl/cards/tyreek-hill-prizm-silver-150.webp", "ar": 0.66667, "ser": [72.66, 74.15, 3.96, "cream tight"]}},
-  {name:"Garrett Wilson", pos:'WR', team:'NYJ', rc:0, r:'E', value:46, run:150, vname:'Prizm Silver', auto:0, patch:0, img:{"src": "images/nfl/cards/garrett-wilson-prizm-silver-150.webp", "ar": 0.66667, "ser": [72.31, 74.51, 3.32, "cream tight"]}}
+  {name:"Garrett Wilson", pos:'WR', team:'NYJ', rc:0, r:'E', value:46, run:150, vname:'Prizm Silver', auto:0, patch:0, img:{"src": "images/nfl/cards/garrett-wilson-prizm-silver-150.webp", "ar": 0.66667, "ser": [72.31, 74.51, 3.32, "cream tight"]}},
+  {name:"Fernando Mendoza", pos:'QB', team:'LV', rc:1, r:'A', value:540, run:50, vname:'Prizm Blue', auto:0, patch:0, img:{"src": "images/nfl/cards/fernando-mendoza-prizm-blue-50.webp", "ar": 0.66667, "ser": [74.17, 74.48, 3.22, "gold tight"]}},
+  {name:"Carnell Tate", pos:'WR', team:'TEN', rc:1, r:'E', value:190, run:50, vname:'Prizm Blue', auto:0, patch:0, img:{"src": "images/nfl/cards/carnell-tate-prizm-blue-50.webp", "ar": 0.66667, "ser": [73.78, 74.41, 3.42, "gold tight"]}},
+  {name:"Jalen Hurts", pos:'QB', team:'PHI', rc:0, r:'E', value:175, run:50, vname:'Prizm Blue', auto:0, patch:0, img:{"src": "images/nfl/cards/jalen-hurts-prizm-blue-50.webp", "ar": 0.66667, "ser": [73.78, 74.51, 3.52, "gold tight"]}},
+  {name:"Justin Herbert", pos:'QB', team:'LAC', rc:0, r:'E', value:160, run:50, vname:'Prizm Blue', auto:0, patch:0, img:{"src": "images/nfl/cards/justin-herbert-prizm-blue-50.webp", "ar": 0.66667, "ser": [74.22, 74.48, 3.32, "gold tight"]}},
+  {name:"KC Concepcion", pos:'WR', team:'CLE', rc:1, r:'E', value:140, run:50, vname:'Prizm Blue', auto:0, patch:0, img:{"src": "images/nfl/cards/kc-concepcion-prizm-blue-50.webp", "ar": 0.66667, "ser": [73.93, 74.48, 3.32, "gold tight"]}}
 ];
 /* how often a card shows up compared with other cards in its tier: lower print run = rarer */
 const RUN_WEIGHT = run => run === 1 ? 0.01 : run <= 5 ? 0.15 : run <= 25 ? 0.4 : run <= 50 ? 0.6 : run === 0 ? 0.5 : 1;
