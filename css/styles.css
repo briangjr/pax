@@ -1112,3 +1112,5 @@ body[data-view="packs"] .toast{bottom:auto;top:calc(66px + env(safe-area-inset-t
 .imgBackCard .pxBack{width:100%;height:100%}
 .wiCard .imgCard{width:44px}
 .evoSlot .imgCard,.grid .imgCard,.bpCard .imgCard{cursor:pointer}
+.imgSer.cream{color:#F1E7CF;filter:drop-shadow(0 .2cqw .4cqw rgba(0,0,0,.5))}
+.imgSer.tight{letter-spacing:.015em}
