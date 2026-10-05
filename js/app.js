@@ -59,7 +59,7 @@ const firstSer = c => c.run ? serList(c.set, c.id)[0] : null;
 function imgCardHTML(c, qty, sn){
   const z = c.img.ser;
   return `<div class="imgCard" style="--ar:${c.img.ar}">${qty > 1 ? `<span class="qty">×${qty}</span>` : ''}<img src="${c.img.src}" alt="${esc(c.name)} ${c.vname}" draggable="false">
-    ${z && c.run ? `<span class="imgSer ${z[3]}" style="left:${z[0]}%;top:${z[1]}%;font-size:${(z[2] / 0.72).toFixed(2)}cqw">${serTxt(c, sn)}</span>` : ''}</div>`;
+    ${z && c.run ? `<span class="imgSer ${z[3]}" style="left:${z[0]}%;top:${z[1]}%;font-size:${(z[2] / 0.81).toFixed(2)}cqw">${serTxt(c, sn)}</span>` : ''}</div>`;
 }
 
 /* ---- sports card design (coded; swaps in a photo when one is added in sports.js) ---- */

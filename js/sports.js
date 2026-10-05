@@ -95,19 +95,28 @@ const SPORT_GRADE = {10:'PAX 10 Gem Mint', 9:'PAX 9 Mint', 8:'PAX 8 NM-MT'};
 
 /* ============ PHOTO CARDS (your uploaded art) ============
    Extra NFL cards drawn from your images in images/nfl/cards/. run = print run (0 = unnumbered short print).
-   The printed number was removed from each image; ser = [center x %, center y %, digit height % of width, color]
+   The printed number was removed from each image; ser = [center x %, center y %, digit height as % of image width, color]
    is where the game prints the live serial number instead. Lower print runs are much rarer (see RUN_WEIGHT). */
 const NFL_PHOTO_CARDS = [
-  {name:"Cam Ward", pos:'QB', team:'TEN', rc:1, r:'X', value:18750, run:1, vname:'Metal Auto', auto:1, patch:0, img:{"src": "images/nfl/cards/cam-ward-leaf-metal-auto-1of1.webp", "ar": 0.66667, "ser": [76.8, 61.0, 3.9, "goldDark"]}},
-  {name:"Patrick Mahomes", pos:'QB', team:'KC', rc:1, r:'X', value:46500, run:5, vname:'Rookie Patch Auto', auto:1, patch:1, img:{"src": "images/nfl/cards/patrick-mahomes-rpa-5.webp", "ar": 0.66667, "ser": [76.61, 57.58, 4.6, "gold"]}},
-  {name:"Tom Brady", pos:'QB', team:'NE', rc:0, r:'X', value:39000, run:5, vname:'Patch Auto', auto:1, patch:1, img:{"src": "images/nfl/cards/tom-brady-patch-auto-5.webp", "ar": 0.66667, "ser": [19.4, 21.4, 2.8, "gold"]}},
-  {name:"Jahmyr Gibbs", pos:'RB', team:'DET', rc:0, r:'P', value:8900, run:5, vname:'Patch Auto', auto:1, patch:1, img:{"src": "images/nfl/cards/jahmyr-gibbs-patch-auto-5.webp", "ar": 0.66667, "ser": [21.29, 20.48, 2.6, "gold"]}},
-  {name:"Ja'Marr Chase", pos:'WR', team:'CIN', rc:1, r:'P', value:4850, run:25, vname:'Origins Auto', auto:1, patch:0, img:{"src": "images/nfl/cards/jamarr-chase-origins-auto-25.webp", "ar": 0.66667, "ser": [84.47, 74.64, 3.0, "goldDark"]}},
-  {name:"Justin Jefferson", pos:'WR', team:'MIN', rc:1, r:'A', value:2150, run:50, vname:'Prizm Gold', auto:0, patch:0, img:{"src": "images/nfl/cards/justin-jefferson-prizm-gold-50.webp", "ar": 0.66667, "ser": [73.19, 74.5, 3.9, "gold"]}},
-  {name:"Cam Ward", pos:'QB', team:'TEN', rc:1, r:'A', value:1180, run:50, vname:'Chrome Gold', auto:0, patch:0, img:{"src": "images/nfl/cards/cam-ward-chrome-gold-50.webp", "ar": 0.66667, "ser": [79.3, 75.5, 4.4, "gold"]}},
+  {name:"Cam Ward", pos:'QB', team:'TEN', rc:1, r:'X', value:18750, run:1, vname:'Metal Auto', auto:1, patch:0, img:{"src": "images/nfl/cards/cam-ward-leaf-metal-auto-1of1.webp", "ar": 0.66667, "ser": [76.8, 61.0, 4.0, "goldDark"]}},
+  {name:"Patrick Mahomes", pos:'QB', team:'KC', rc:1, r:'X', value:46500, run:5, vname:'Rookie Patch Auto', auto:1, patch:1, img:{"src": "images/nfl/cards/patrick-mahomes-rpa-5.webp", "ar": 0.66667, "ser": [76.61, 57.58, 3.71, "gold"]}},
+  {name:"Tom Brady", pos:'QB', team:'NE', rc:0, r:'X', value:39000, run:5, vname:'Patch Auto', auto:1, patch:1, img:{"src": "images/nfl/cards/tom-brady-patch-auto-5.webp", "ar": 0.66667, "ser": [19.4, 21.4, 3.66, "gold"]}},
+  {name:"Jahmyr Gibbs", pos:'RB', team:'DET', rc:0, r:'P', value:8900, run:5, vname:'Patch Auto', auto:1, patch:1, img:{"src": "images/nfl/cards/jahmyr-gibbs-patch-auto-5.webp", "ar": 0.66667, "ser": [21.29, 20.48, 4.0, "gold"]}},
+  {name:"Ja'Marr Chase", pos:'WR', team:'CIN', rc:1, r:'P', value:4850, run:25, vname:'Origins Auto', auto:1, patch:0, img:{"src": "images/nfl/cards/jamarr-chase-origins-auto-25.webp", "ar": 0.66667, "ser": [84.47, 74.64, 3.52, "goldDark"]}},
+  {name:"Justin Jefferson", pos:'WR', team:'MIN', rc:1, r:'A', value:2150, run:50, vname:'Prizm Gold', auto:0, patch:0, img:{"src": "images/nfl/cards/justin-jefferson-prizm-gold-50.webp", "ar": 0.66667, "ser": [73.19, 74.5, 3.32, "gold"]}},
+  {name:"Cam Ward", pos:'QB', team:'TEN', rc:1, r:'A', value:1180, run:50, vname:'Chrome Gold', auto:0, patch:0, img:{"src": "images/nfl/cards/cam-ward-chrome-gold-50.webp", "ar": 0.66667, "ser": [79.3, 75.5, 3.91, "gold"]}},
   {name:"Cam Ward", pos:'QB', team:'TEN', rc:1, r:'A', value:890, run:0, vname:'Downtown', auto:0, patch:0, img:{"src": "images/nfl/cards/cam-ward-downtown.webp", "ar": 0.66667}},
-  {name:"Matthew Stafford", pos:'QB', team:'LAR', rc:0, r:'A', value:640, run:25, vname:'Prestige', auto:0, patch:0, img:{"src": "images/nfl/cards/matthew-stafford-prestige-25.webp", "ar": 0.66667, "ser": [81.01, 23.89, 4.4, "goldDark"]}},
-  {name:"Cam Ward", pos:'QB', team:'TEN', rc:1, r:'E', value:64.5, run:299, vname:'Donruss', auto:0, patch:0, img:{"src": "images/nfl/cards/cam-ward-donruss-299.webp", "ar": 0.66667, "ser": [79.6, 74.5, 4.7, "dark"]}}
+  {name:"Matthew Stafford", pos:'QB', team:'LAR', rc:0, r:'A', value:640, run:25, vname:'Prestige', auto:0, patch:0, img:{"src": "images/nfl/cards/matthew-stafford-prestige-25.webp", "ar": 0.66667, "ser": [81.01, 23.89, 3.61, "goldDark"]}},
+  {name:"Cam Ward", pos:'QB', team:'TEN', rc:1, r:'E', value:64.5, run:299, vname:'Donruss', auto:0, patch:0, img:{"src": "images/nfl/cards/cam-ward-donruss-299.webp", "ar": 0.66667, "ser": [79.6, 74.5, 3.42, "dark"]}},
+  {name:"Caleb Williams", pos:'QB', team:'CHI', rc:1, r:'X', value:16500, run:5, vname:'Rookie Patch Auto', auto:1, patch:1, img:{"src": "images/nfl/cards/caleb-williams-rpa-5.webp", "ar": 0.66667, "ser": [22.46, 19.08, 4.0, "gold"]}},
+  {name:"Bo Nix", pos:'QB', team:'DEN', rc:1, r:'P', value:7400, run:5, vname:'Rookie Patch Auto', auto:1, patch:1, img:{"src": "images/nfl/cards/bo-nix-rpa-5.webp", "ar": 0.66667, "ser": [21.73, 20.61, 4.0, "gold"]}},
+  {name:"Aidan Hutchinson", pos:'EDGE', team:'DET', rc:0, r:'P', value:6800, run:5, vname:'Patch Auto', auto:1, patch:1, img:{"src": "images/nfl/cards/aidan-hutchinson-patch-auto-5.webp", "ar": 0.66667, "ser": [22.36, 21.09, 4.0, "gold"]}},
+  {name:"Lamar Jackson", pos:'QB', team:'BAL', rc:0, r:'P', value:6200, run:25, vname:'Origins Auto', auto:1, patch:0, img:{"src": "images/nfl/cards/lamar-jackson-origins-auto-25.webp", "ar": 0.66667, "ser": [82.86, 73.34, 3.52, "goldDark"]}},
+  {name:"Myles Garrett", pos:'EDGE', team:'CLE', rc:0, r:'P', value:5600, run:5, vname:'Signature Auto', auto:1, patch:0, img:{"src": "images/nfl/cards/myles-garrett-auto-5.webp", "ar": 0.66667, "ser": [22.12, 20.67, 3.91, "gold"]}},
+  {name:"T.J. Watt", pos:'LB', team:'PIT', rc:0, r:'P', value:5200, run:5, vname:'Signature Auto', auto:1, patch:0, img:{"src": "images/nfl/cards/tj-watt-auto-5.webp", "ar": 0.66667, "ser": [22.75, 21.39, 3.71, "gold"]}},
+  {name:"Jaxon Smith-Njigba", pos:'WR', team:'SEA', rc:0, r:'A', value:2400, run:25, vname:'Origins Auto', auto:1, patch:0, img:{"src": "images/nfl/cards/jaxon-smith-njigba-origins-auto-25.webp", "ar": 0.66667, "ser": [82.67, 74.71, 3.32, "goldDark"]}},
+  {name:"Derrick Henry", pos:'RB', team:'BAL', rc:0, r:'A', value:580, run:25, vname:'Prestige', auto:0, patch:0, img:{"src": "images/nfl/cards/derrick-henry-prestige-25.webp", "ar": 0.66667, "ser": [81.01, 21.87, 3.71, "goldDark"]}},
+  {name:"Jared Goff", pos:'QB', team:'DET', rc:0, r:'A', value:520, run:25, vname:'Prestige', auto:0, patch:0, img:{"src": "images/nfl/cards/jared-goff-prestige-25.webp", "ar": 0.66667, "ser": [81.05, 23.89, 3.61, "goldDark"]}}
 ];
 /* how often a card shows up compared with other cards in its tier: lower print run = rarer */
 const RUN_WEIGHT = run => run === 1 ? 0.01 : run <= 5 ? 0.15 : run <= 25 ? 0.4 : run <= 50 ? 0.6 : run === 0 ? 0.5 : 1;
