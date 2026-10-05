@@ -126,13 +126,13 @@ function buildSportSet(id, cfg){
 
 /* Pack looks: pk = cover gradient, glow = shadow color. Add cover:'images/…' to use your own art. */
 const SPORT_PACKS = [
-  {name:'Rookie Pack',       pk:'linear-gradient(160deg,#6B7380,#2A2F37)',              glow:'#8A93A3'},
-  {name:'Starter Pack',      pk:'linear-gradient(160deg,#B9C3D1,#4A5566)',              glow:'#9FB0C8'},
-  {name:'Veteran Pack',      pk:'linear-gradient(160deg,#3A4150,#0D0F14)',              glow:'#5A6478'},
-  {name:'All-Star Pack',     pk:'linear-gradient(160deg,#F4F6FA,#9AA3B2 55%,#4C5361)',  glow:'#E6EAF2'},
+  {name:'Rookie Pack',       pk:'linear-gradient(160deg,#3A4352,#141821)',              glow:'#3B82F6'},
+  {name:'Starter Pack',      pk:'linear-gradient(160deg,#C9D1DC,#59657A)',              glow:'#10B981'},
+  {name:'Veteran Pack',      pk:'linear-gradient(160deg,#2A2F3A,#07080B)',              glow:'#EF4444'},
+  {name:'All-Star Pack',     pk:'linear-gradient(160deg,#F4F6FA,#9AA3B2 55%,#4C5361)',  glow:'#8B5CF6'},
   {name:'MVP Pack',          pk:'linear-gradient(160deg,#F7E3A1,#C9A24C 55%,#5A4316)',  glow:'#E8C25A'},
   {name:'Hall of Fame Pack', pk:'linear-gradient(160deg,#1A1A1A,#5B4A2A 50%,#C9A24C)',  glow:'#C9A24C'},
-  {name:'GOAT Pack',         pk:'linear-gradient(160deg,#FFFFFF,#BFC6D2 30%,#1A1D24 70%,#000)', glow:'#FFFFFF'}
+  {name:'GOAT Pack',         pk:'linear-gradient(160deg,#FFFFFF,#BFC6D2 30%,#1A1D24 70%,#000)', glow:'#C4B5FD'}
 ];
 
 SETS.nfl = buildSportSet('nfl', {
