@@ -1,7 +1,7 @@
 /* PAX offline support.
    Everything the game needs is saved on the device the first time it loads online,
    so after that it runs with no connection. VERSION changes whenever the files change. */
-const VERSION = 'pax-4cc6bcd337';
+const VERSION = 'pax-83775a0af6';
 const FILES = [
   "./",
   "css/styles.css",
@@ -103,6 +103,16 @@ const FILES = [
   "images/cards/079-sprigpaw.webp",
   "images/cards/080-ripfin.webp",
   "images/cards/081-taloki-owlet.webp",
+  "images/nfl/cards/cam-ward-chrome-gold-50.webp",
+  "images/nfl/cards/cam-ward-donruss-299.webp",
+  "images/nfl/cards/cam-ward-downtown.webp",
+  "images/nfl/cards/cam-ward-leaf-metal-auto-1of1.webp",
+  "images/nfl/cards/jahmyr-gibbs-patch-auto-5.webp",
+  "images/nfl/cards/jamarr-chase-origins-auto-25.webp",
+  "images/nfl/cards/justin-jefferson-prizm-gold-50.webp",
+  "images/nfl/cards/matthew-stafford-prestige-25.webp",
+  "images/nfl/cards/patrick-mahomes-rpa-5.webp",
+  "images/nfl/cards/tom-brady-patch-auto-5.webp",
   "index.html",
   "js/app.js",
   "js/data.js",

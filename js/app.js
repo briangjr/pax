@@ -35,10 +35,32 @@ const $ = s => document.querySelector(s);
 const money = v => '$' + v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const rand = () => { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] / 4294967296; };
 const pick = arr => arr[Math.floor(rand() * arr.length)];
-function avg(r){ return G.BY[r].reduce((a,c) => a + c.value, 0) / G.BY[r].length; }
+const cardW = c => c.w || 1;                      // photo cards with small print runs carry w < 1
+function avg(r){ const t = G.BY[r].reduce((a,c) => a + cardW(c), 0); return G.BY[r].reduce((a,c) => a + c.value * cardW(c), 0) / t; }
+function wPick(list, wf){ const tot = list.reduce((a, c) => a + wf(c), 0); if (!(tot > 0)) return null; let x = rand() * tot;
+  for (const c of list) { x -= wf(c); if (x < 0) return c; } return list[list.length - 1]; }
 function sellPrice(c){ return Math.round(c.value * SELL_RATE * 100) / 100; }
 function toast(t){ const el = $('#toast'); el.textContent = t; el.classList.add('on'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('on'), 1800); }
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[ch]);
+
+/* ---- serial numbers: every copy of a numbered card has its own number, e.g. 18/50 ---- */
+const serList = (sid, id) => ((S.ser = S.ser || {})[sid] = S.ser[sid] || {})[id] = (S.ser[sid][id] || []);
+const canPull = c => !c.run || serList(c.set, c.id).length < c.run;
+function assignSerial(c){                    // next number after the last one handed out, skipping ones you own
+  if (!c.run) return null;
+  const own = new Set(serList(c.set, c.id)), nx = ((S.serNext = S.serNext || {})[c.set] = S.serNext[c.set] || {});
+  let start = nx[c.id] != null ? nx[c.id] : Math.floor(rand() * c.run);
+  for (let k = 1; k <= c.run; k++) { const sn = (start + k - 1) % c.run + 1; if (!own.has(sn) || k === c.run) { nx[c.id] = sn % c.run; serList(c.set, c.id).push(sn); return sn; } }
+}
+const serTxt = (c, sn) => !c.run ? '' : c.run === 1 ? '1/1' : (sn ? String(sn).padStart(String(c.run).length, '0') : '—') + '/' + c.run;
+const firstSer = c => c.run ? serList(c.set, c.id)[0] : null;
+
+/* ---- photo cards (your uploaded art) with the live serial printed where the original number was ---- */
+function imgCardHTML(c, qty, sn){
+  const z = c.img.ser;
+  return `<div class="imgCard" style="--ar:${c.img.ar}">${qty > 1 ? `<span class="qty">×${qty}</span>` : ''}<img src="${c.img.src}" alt="${esc(c.name)} ${c.vname}" draggable="false">
+    ${z && c.run ? `<span class="imgSer ${z[3]}" style="left:${z[0]}%;top:${z[1]}%;font-size:${(z[2] / 0.72).toFixed(2)}cqw">${serTxt(c, sn)}</span>` : ''}</div>`;
+}
 
 /* ---- sports card design (coded; swaps in a photo when one is added in sports.js) ---- */
 const ICON = {
@@ -46,13 +68,13 @@ const ICON = {
   basketball:'<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="25"/><path d="M7 32h50M32 7v50M14 14c8 8 8 28 0 36M50 14c-8 8-8 28 0 36"/></svg>'
 };
 const initials = n => n.replace(/\./g,'').split(/[\s-]+/).filter(w => !/^(jr|sr|ii|iii)$/i.test(w)).map(w => w[0]).slice(0, 2).join('').toUpperCase();
-function spCardHTML(c, qty, inSlab){
+function spCardHTML(c, qty, inSlab, sn){
   const L = c.name.length;
   return `<div class="spc s${c.r}${c.rc ? ' isRc' : ''}" style="--t1:${c.tc[0]};--t2:${c.tc[1]}">
     ${qty > 1 ? `<span class="qty">×${qty}</span>` : ''}
     <div class="spBg"></div>
     <div class="spArt">${c.art ? `<img src="${c.art}" alt="">` : `<span class="spIco">${ICON[c.sport]}</span><span class="spIni">${initials(c.name)}</span>`}</div>
-    <div class="spTop"><span class="spVar">${c.vname}</span>${c.serial ? `<span class="spSer">${c.serial}</span>` : ''}</div>
+    <div class="spTop"><span class="spVar">${c.vname}</span>${c.run ? `<span class="spSer">${serTxt(c, sn)}</span>` : ''}</div>
     ${c.patch ? '<div class="spPatch"><i></i></div>' : ''}
     ${c.grade && !inSlab ? `<span class="spGr">PAX ${c.grade}</span>` : ''}
     ${c.auto ? `<div class="spAuto"><span class="spSig" style="font-size:${Math.min(13, 150 / L).toFixed(2)}cqw">${esc(c.name)}</span></div>` : ''}
@@ -60,17 +82,18 @@ function spCardHTML(c, qty, inSlab){
     <span class="spPax">PAX</span>
   </div>`;
 }
-function spSlabHTML(c){
+function spSlabHTML(c, sn){
   const G2 = SETS[c.set];
   return `<div class="pxSlab"><div class="pxLbl"><div class="pxL1"><b>PAX</b><span>${G2.setName.replace('PAX ','')}</span></div>
-    <div class="pxL2"><span>${esc(c.name)}</span><span>${c.vname}${c.serial ? ' ' + c.serial : ''} · #${c.num}</span></div>
+    <div class="pxL2"><span>${esc(c.name)}</span><span>${c.vname}${c.run ? ' ' + serTxt(c, sn) : ''} · #${c.num}</span></div>
     <div class="pxGr"><small>${(G2.GRADE[c.grade] || '').replace(/^PAX \d+ /,'')}</small><b>${c.grade}</b></div></div>
-    <div class="pxWin">${spCardHTML(c, 0, true)}</div></div>`;
+    <div class="pxWin">${spCardHTML(c, 0, true, sn)}</div></div>`;
 }
 const pxBackHTML = (c, slab) => `<div class="pxBack${slab ? ' inSlab' : ''}"><div class="pxBackIn"><span class="pxBackMark">PAX</span><small>${SETS[c.set].sportName || ''}</small></div></div>`;
 
-function cardHTML(c, qty){
-  if (c.sport) return spCardHTML(c, qty);
+function cardHTML(c, qty, sn){
+  if (c.img) return imgCardHTML(c, qty, sn || firstSer(c));
+  if (c.sport) return spCardHTML(c, qty, false, sn || firstSer(c));
   if (c.slab) { const [l,t,w,h] = c.slab.box;
     return `<div class="card r${c.r} full" style="aspect-ratio:${(w*c.slab.ar/h).toFixed(4)}">${qty > 1 ? `<span class="qty">×${qty}</span>` : ''}<img src="${c.slab.src}" alt="${c.name}" style="position:absolute;width:${(100/w).toFixed(3)}%;height:${(100/h).toFixed(3)}%;left:${(-l/w*100).toFixed(3)}%;top:${(-t/h*100).toFixed(3)}%;max-width:none"></div>`; }
   const art = CARD_ART[c.id] ? `<img src="${CARD_ART[c.id]}" alt="">` : `<span class="glyph">${c.el.icon}</span>`;
@@ -83,7 +106,7 @@ function cardHTML(c, qty){
     </div></div>`;
 }
 const lockedHTML = c => `<div class="card locked${c.sport ? ' spLocked' : ''}"><div class="in">#${c.num}</div></div>`;
-const graded = c => c.sport ? !!c.grade : !!(c.slab && !c.slab.raw);
+const graded = c => c.img ? true : c.sport ? !!c.grade : !!(c.slab && !c.slab.raw);
 const markHTML = () => G.sport ? '<span class="mEye pxMark"><img src="images/brand/pax-logo.webp" alt=""></span>' : '<span class="mEye"><img src="images/brand/eye.webp" alt=""></span>';
 /* Pack art: built in code, fancier with each tier (0 = cheapest, 6 = best). A pack with `cover` uses that image instead. */
 const SPARKS = n => Array.from({length:n}, (_, i) => `<i style="left:${(i * 37 + 11) % 90 + 5}%;top:${(i * 53 + 17) % 80 + 8}%;animation-delay:${(i * .37 % 2.4).toFixed(2)}s"></i>`).join('');
@@ -116,7 +139,7 @@ const goldWeight = (c, s) => Math.pow(c.value, -s);
 function pickGold(pool, s){ const tot = pool.reduce((a,c) => a + goldWeight(c, s), 0); let x = rand() * tot;
   for (const c of pool) { x -= goldWeight(c, s); if (x < 0) return c; } return pool[pool.length - 1]; }
 function poolWeights(p, m, b, i){ const pool = bandPool(p, m, i, b), s = conf(p, m, b).skew;
-  return pool.map(c => [c, i === 5 ? goldWeight(c, s) : 1]); }
+  return pool.map(c => [c, cardW(c) * (i === 5 ? goldWeight(c, s) : 1)]); }
 function bandMean(p, m, i, b){ const w = poolWeights(p, m, b, i), t = w.reduce((a,[,x]) => a + x, 0); return w.reduce((a,[c,x]) => a + c.value * x, 0) / t; }
 function jackpotTotal(p, m, b){ const j = conf(p, m, b).jackpot; return j.A + j.P + j.X; }
 function bandRange(p, m, i, b){ const [lo, hi] = band(p, m, i, b); return i === 5 || hi === Infinity ? `${money(lo)}+` : `${money(lo)} – ${money(hi)}`; }
@@ -135,12 +158,19 @@ function packStats(p, m = vol(), b = false){
   for (const r of ['A','P','X']) ev += c.jackpot[r] * avg(r);
   return {ev, profit: profitChance(p, m, b), jp: jackpotTotal(p, m, b), gold: c.odds[5]};
 }
+/* A numbered card whose every serial is already in your collection can't be pulled until you sell one. */
 function pullFrom(p, m = vol(), b = false){
-  const c = conf(p, m, b); let x = rand(), i = 0, acc = 0;
-  for (; i < 5; i++) { acc += c.odds[i]; if (x < acc) break; }
-  if (i === 5) { let y = rand() * c.odds[5];
-    for (const r of ['X','P','A']) { if (y < c.jackpot[r]) return {band:5, card:pick(G.BY[r]), jackpot:true}; y -= c.jackpot[r]; } }
-  return {band:i, card: i === 5 ? pickGold(bandPool(p, m, 5, b), c.skew) : pick(bandPool(p, m, i))};
+  const c = conf(p, m, b);
+  for (let tries = 0; tries < 40; tries++) {
+    let x = rand(), i = 0, acc = 0;
+    for (; i < 5; i++) { acc += c.odds[i]; if (x < acc) break; }
+    if (i === 5) { let y = rand() * c.odds[5], hit = null;
+      for (const r of ['X','P','A']) { if (y < c.jackpot[r]) { hit = r; break; } y -= c.jackpot[r]; }
+      if (hit) { const card = wPick(G.BY[hit], x2 => canPull(x2) ? cardW(x2) : 0); if (card) return {band:5, card, jackpot:true}; continue; } }
+    const w = new Map(poolWeights(p, m, b, i)), card = wPick([...w.keys()], x2 => canPull(x2) ? w.get(x2) : 0);
+    if (card) return {band:i, card};
+  }
+  return {band:0, card: wPick(G.CARDS.filter(canPull), () => 1) || G.CARDS[0]};
 }
 const MAX_PULL = () => Math.max(...G.CARDS.map(c => c.value));
 const pct = x => x >= 1 ? '100%' : x === 0 ? '—' : x >= .1 ? (x*100).toFixed(0)+'%' : x >= .01 ? (x*100).toFixed(1)+'%' : x >= .001 ? (x*100).toFixed(2)+'%' : +(x*100).toPrecision(2)+'%';
@@ -249,7 +279,8 @@ function cardChances(p, m, b){
   const c = conf(p, m, b), pr = new Map();
   c.odds.forEach((q, i) => { if (!q) return; const w = poolWeights(p, m, b, i), t = w.reduce((a, [, x]) => a + x, 0), qq = i === 5 ? q - jackpotTotal(p, m, b) : q;
     w.forEach(([card, x]) => pr.set(card, (pr.get(card) || 0) + qq * x / t)); });
-  for (const r of ['A','P','X']) if (c.jackpot[r] > 0) G.BY[r].forEach(card => pr.set(card, (pr.get(card) || 0) + c.jackpot[r] / G.BY[r].length));
+  for (const r of ['A','P','X']) if (c.jackpot[r] > 0) { const t = G.BY[r].reduce((a, x) => a + cardW(x), 0);
+    G.BY[r].forEach(card => pr.set(card, (pr.get(card) || 0) + c.jackpot[r] * cardW(card) / t)); }
   return [...pr].sort((a, b2) => b2[0].value - a[0].value);
 }
 function openInside(){
@@ -257,7 +288,7 @@ function openInside(){
   openBS(`<div class="ssHead"><div class="ssIco">${packHTML(p)}</div>
       <div class="ssTxt"><h3>What's inside</h3><p>${p.name} · ${MODES[m].name}${b ? ' + Gold Boost' : ''} · ${list.length} possible cards</p></div><button class="ssX" id="ssX" aria-label="Close">✕</button></div>
     <div class="wiList">${list.slice(0, SHOW).map(([c, q]) => `<div class="wiRow"><div class="wiCard">${cardHTML(c)}</div>
-      <div class="wiMain"><b>${esc(c.name)}</b><span>${c.sport ? c.vname + (c.serial ? ' ' + c.serial : '') : G.RAR[c.r].name}${c.grade ? ' · ' + G.GRADE[c.grade] : ''}</span></div>
+      <div class="wiMain"><b>${esc(c.name)}</b><span>${c.sport ? c.vname + (c.run ? ' /' + c.run : c.photo ? ' · short print' : '') : G.RAR[c.r].name}${c.grade ? ' · ' + G.GRADE[c.grade] : ''}</span></div>
       <div class="wiVal"><b>${money(c.value)}</b><span>${q >= .5 ? pctTxt(q) : '1 in ' + Math.round(1 / q).toLocaleString('en-US')}</span></div></div>`).join('')}</div>
     ${list.length > SHOW ? `<p class="ssNote">+ ${list.length - SHOW} more cards from ${money(list[list.length - 1][0].value)} to ${money(list[SHOW][0].value)}.</p>` : ''}`);
   $('#ssX').onclick = closeBS;
@@ -343,12 +374,14 @@ function renderCol(){
 
 function cardMeta(c){
   if (c.sport) { const G2 = SETS[c.set];
-    return `${c.vname}${c.serial ? ' · ' + c.serial : ''} · ${c.pos} · ${c.team}${c.rc ? ' · Rookie' : ''}${c.grade ? '<br>' + G2.GRADE[c.grade] : ''}<br>${G2.setName} #${c.num}`; }
+    const own = c.run ? serList(c.set, c.id).slice().sort((a, b) => a - b) : [];
+    return `${c.vname}${c.run ? ' · numbered to ' + c.run : ''} · ${c.pos} · ${c.team}${c.rc ? ' · Rookie' : ''}${c.grade ? '<br>' + G2.GRADE[c.grade] : ''}${own.length ? '<br>Your copies: ' + own.map(x => serTxt(c, x)).join(', ') : ''}<br>${G2.setName} #${c.num}`; }
   return `${SETS.taloki.RAR[c.r].name} · ${c.el.name} · #${c.num}${c.grade ? ' · ' + SETS.taloki.GRADE[c.grade] : ''}${c.basic ? '<br>Basic creature' : ''}${c.stage ? `<br>Stage ${c.stage}${c.from ? ' · evolves from ' + c.from : ''}${c.into ? ' · into ' + c.into : ''}` : ''}`;
 }
-function showCard(id, sid = G.id, onSell){
+function showCard(id, sid = G.id, onSell, sn){
   const c = SETS[sid].CARD[id], col = S.cols[sid], q = col[id] || 0;
-  $('#sheet').innerHTML = `${card3dHTML(c)}<div class="meta tiny">Drag to tilt · tap to flip</div><h3>${c.name}</h3>
+  const showSn = sn || (c.run ? serList(sid, id)[serList(sid, id).length - 1] : null);
+  $('#sheet').innerHTML = `${card3dHTML(c, showSn)}<div class="meta tiny">Drag to tilt · tap to flip</div><h3>${c.name}</h3>
     <div class="meta">${cardMeta(c)}<br>Value <strong>${money(c.value)}</strong> · You own ${q}</div>
     <div class="actions" style="justify-content:center">
       ${q ? `<button class="buy" id="sell1" style="width:auto">Sell 1 for ${money(sellPrice(c))}</button>` : ''}
@@ -356,14 +389,17 @@ function showCard(id, sid = G.id, onSell){
   $('#modal').classList.add('on');
   attach3d($('#sheet .v3d'));
   $('#closeM').onclick = closeModal;
-  if (q) $('#sell1').onclick = () => { sell([[id,1]], sid); closeModal(); if (onSell) onSell(); };
+  if (q) $('#sell1').onclick = () => { sell([[id, 1, showSn]], sid); closeModal(); if (onSell) onSell(); };
 }
 function closeModal(){ $('#modal').classList.remove('on'); }
 $('#modal').onclick = e => { if (e.target.id === 'modal') closeModal(); };
 
 function sell(pairs, sid = G.id){
   let total = 0, n = 0; const col = S.cols[sid];
-  for (const [id,q] of pairs) { const have = col[id] || 0, k = Math.min(q, have); if (!k) continue; col[id] = have - k; if (!col[id]) delete col[id]; total += sellPrice(SETS[sid].CARD[id]) * k; n += k; }
+  for (const [id, q, sn] of pairs) { const have = col[id] || 0, k = Math.min(q, have); if (!k) continue; col[id] = have - k; if (!col[id]) delete col[id];
+    const card = SETS[sid].CARD[id];
+    if (card.run) { const L = serList(sid, id); for (let j = 0; j < k; j++) { const at = sn != null ? L.indexOf(sn) : -1; L.splice(at >= 0 ? at : L.length - 1, 1); } }
+    total += sellPrice(card) * k; n += k; }
   total = Math.round(total * 100) / 100;
   if (!n) { toast('Nothing to sell'); return 0; }
   S.bal = Math.round((S.bal + total) * 100) / 100; S.earned += total; save(); renderBal(); renderCol(); renderProfile(); if (document.body.dataset.view === 'show') renderShowroom();
@@ -384,12 +420,13 @@ function openPack(pid, boost = false, n = 1){
   lastPack = pid; lastBoost = boost; lastN = n;
   S.bal = Math.round((S.bal - k) * 100) / 100; S.spent = Math.round((S.spent + k) * 100) / 100; S.opened += n; S.openedBy[G.id] = (S.openedBy[G.id] || 0) + n;
   const m = vol();
-  const pulls = Array.from({length: n}, () => pullFrom(p, m, boost));
+  const pulls = [];
+  for (let k = 0; k < n; k++) { const pl = pullFrom(p, m, boost); pl.serial = assignSerial(pl.card); pulls.push(pl); }
   pulls.forEach(pl => { const c = pl.card;
     COL[c.id] = (COL[c.id] || 0) + 1;
     if (!bestCard() || c.value > bestCard().value) S.best = {s:G.id, id:c.id};
     if (!S.bestBy[G.id] || c.value > G.CARD[S.bestBy[G.id]].value) S.bestBy[G.id] = c.id;
-    S.history = [{t: Date.now(), s: G.id, p: p.id, c: c.id, b: pl.band, m, g: boost ? 1 : 0}, ...(S.history || [])].slice(0, 300); });
+    S.history = [{t: Date.now(), s: G.id, p: p.id, c: c.id, b: pl.band, m, g: boost ? 1 : 0, sn: pl.serial || undefined}, ...(S.history || [])].slice(0, 300); });
   cur = Object.assign({p, m, boost, n, pulls}, pulls[0]);
   save(); renderBal();
   document.body.style.overflow = 'hidden'; document.body.classList.add('opening'); closeBS(); closeCat();
@@ -573,7 +610,7 @@ function revealPhase(){
   const shown = new Set(), acts = $('#mActs');
   const reveal = i => { if (shown.has(i)) return; shown.add(i);
     const pl = cur.pulls[i], c = pl.card, rgb = pullRGB(pl), slot = $('#mc' + i + ' .mSlot');
-    slot.innerHTML = `<div class="mFace zap" style="--tc:${rgb}"><div class="pfit" style="${fitStyle(faceAR(c))}">${frontHTML(c)}</div></div>`;
+    slot.innerHTML = `<div class="mFace zap" style="--tc:${rgb}"><div class="pfit" style="${fitStyle(faceAR(c))}">${frontHTML(c, pl.serial)}</div></div>`;
     ring(rgb, slot); sparks(rgb, 22, slot, 140);
     if ('APX'.includes(c.r)) flash(c.r);
     $('#ml' + i).innerHTML = `<b style="--tc:${rgb}">${money(c.value)}</b><span>${esc(c.name)}</span>`;
@@ -593,8 +630,8 @@ function showMultiResults(animate){
   SB().innerHTML = `<div class="res resMulti">
     <div class="resTop"><button class="topX" id="closeRes" aria-label="Close">✕</button></div>
     <div class="mGrid rGrid c${n}">${gridRows(n).map(r => `<div class="mRow">${r.map(i => { const pl = cur.pulls[i], c = pl.card;
-      return `<button class="rCell${pl.sold ? ' sold' : ''}" data-i="${i}"><div class="rSlot"><div class="pfit" style="${fitStyle(faceAR(c))}">${frontHTML(c)}</div>${pl.sold ? '<span class="soldTag">Sold</span>' : ''}</div>
-        <b style="--tc:${pullRGB(pl)}">${money(c.value)}</b><span>${esc(c.name)}</span></button>`; }).join('')}</div>`).join('')}</div>
+      return `<button class="rCell${pl.sold ? ' sold' : ''}" data-i="${i}"><div class="rSlot"><div class="pfit" style="${fitStyle(faceAR(c))}">${frontHTML(c, pl.serial)}</div>${pl.sold ? '<span class="soldTag">Sold</span>' : ''}</div>
+        <b style="--tc:${pullRGB(pl)}">${money(c.value)}</b><span>${esc(c.name)}${c.run ? ' · ' + serTxt(c, pl.serial) : ''}</span></button>`; }).join('')}</div>`).join('')}</div>
     <div class="resVal" id="rv" style="--vc:255,255,255">${money(animate ? 0 : total)}</div>
     <div class="resName">${n} cards · ${p.name}${cur.boost ? ' · Gold Boost' : ''} · paid ${money(cost(p, cur.boost) * n)}</div>
     <div class="meta tiny">Tap a card to look closer</div>
@@ -605,16 +642,17 @@ function showMultiResults(animate){
     const count = now => { const f = Math.min(1, (now - t0) / D); rv.textContent = money(total * (1 - Math.pow(1 - f, 3))); if (f < 1) requestAnimationFrame(count); };
     requestAnimationFrame(count); }
   document.querySelectorAll('.rCell').forEach(b => b.onclick = () => { const pl = cur.pulls[+b.dataset.i]; if (pl.sold) return;
-    showCard(pl.card.id, pl.card.set, () => { pl.sold = true; showMultiResults(false); }); });
+    showCard(pl.card.id, pl.card.set, () => { pl.sold = true; showMultiResults(false); }, pl.serial); });
   $('#keep').onclick = $('#closeRes').onclick = closeStage;
-  const sa = $('#sellAll'); if (sa) sa.onclick = () => { sell(keep.map(pl => [pl.card.id, 1])); closeStage(); };
+  const sa = $('#sellAll'); if (sa) sa.onclick = () => { sell(keep.map(pl => [pl.card.id, 1, pl.serial])); closeStage(); };
   $('#again').onclick = () => { closeStage(); openPack(lastPack, lastBoost, lastN); };
 }
 
 /* ---- Step 4: peel the cover off (or tap to open) ---- */
 const SLAB_AR = 0.62;
-function faceAR(c){ return c.sport ? (c.grade ? SLAB_AR : 5/7) : c.slab ? c.slab.ar : 5/7; }
-function frontHTML(c){ if (c.sport) return c.grade ? spSlabHTML(c) : spCardHTML(c);
+function faceAR(c){ return c.img ? c.img.ar : c.sport ? (c.grade ? SLAB_AR : 5/7) : c.slab ? c.slab.ar : 5/7; }
+function frontHTML(c, sn){ if (c.img) return imgCardHTML(c, 0, sn || firstSer(c));
+  if (c.sport) { sn = sn || firstSer(c); return c.grade ? spSlabHTML(c, sn) : spCardHTML(c, 0, false, sn); }
   return graded(c) ? `<img class="slabImg" src="${c.slab.src}" alt="${c.name}">` : cardHTML(c); }
 /* every cover is the same card shape; the real card (raw or graded) is fitted inside it */
 function fitStyle(ar){ const box = 5/7; return ar < box ? `height:100%;width:${(ar / box * 100).toFixed(2)}%` : `width:100%;height:${(box / ar * 100).toFixed(2)}%`; }
@@ -634,7 +672,7 @@ function showPeel(){
   SB().innerHTML = `<button class="skip" id="skip">Skip</button>
     <div class="hint">${cur.jackpot ? 'Jackpot! Peel it open' : TIERS[cur.band].name + ' tier · peel it open'}</div>
     <div class="peelWrap" id="pw" style="--ar:${5/7};--tc:${rgb}">
-      <div class="pfront" id="pfr"><div class="pfit" style="${fitStyle(faceAR(c))}">${frontHTML(c)}</div></div>
+      <div class="pfront" id="pfr"><div class="pfit" style="${fitStyle(faceAR(c))}">${frontHTML(c, cur.serial)}</div></div>
       <div class="pcover mf${cur.jackpot ? ' rainbowBg' : ''}" id="pc">${markHTML()}</div>
       <div class="pflapWrap"><div class="pflap" id="pf"></div></div>
     </div>
@@ -668,7 +706,7 @@ function showPeel(){
     ring(rgb, pw); sparks(rgb, 40, pw, 240);
     if ('APX'.includes(c.r)) flash(c.r); else flashRGB(rgb, false);
     $('#pulled').style.setProperty('--tc', rgb);
-    $('#pulled').innerHTML = `<span class="bigVal">${money(c.value)}</span>${c.name}<small>${c.sport ? c.vname + (c.serial ? ' ' + c.serial : '') : G.RAR[c.r].name}${c.grade ? ' · ' + G.GRADE[c.grade] : ''}</small>`;
+    $('#pulled').innerHTML = `<span class="bigVal">${money(c.value)}</span>${c.name}<small>${c.sport ? c.vname + (c.run ? ' ' + serTxt(c, cur.serial) : '') : G.RAR[c.r].name}${c.grade ? ' · ' + G.GRADE[c.grade] : ''}</small>`;
     $('#pulled').classList.toggle('x', c.r === 'X'); $('#pulled').classList.toggle('a', c.r === 'A'); $('#pulled').classList.toggle('p', c.r === 'P');
     $('#ph').textContent = 'Tap to continue';
     setTimeout(() => { SB().onclick = showResults; }, 350);
@@ -676,11 +714,11 @@ function showPeel(){
 }
 
 /* ---- 3D card viewer: drag to tilt, tap to flip and see the back ---- */
-function card3dHTML(c){
-  const back = c.sport ? (c.grade ? `<div class="pxSlab pxSlabBack"><div class="pxLbl pxLblBack"><b>PAX</b><span>Grading · Cert ${String(c.id * 7919 + 100000).slice(-8)}</span></div><div class="pxWin">${pxBackHTML(c, true)}</div></div>` : pxBackHTML(c))
+function card3dHTML(c, sn){
+  const back = c.img ? `<div class="imgBack"><div class="imgBackCard">${pxBackHTML(c)}</div></div>` : c.sport ? (c.grade ? `<div class="pxSlab pxSlabBack"><div class="pxLbl pxLblBack"><b>PAX</b><span>Grading · Cert ${String(c.id * 7919 + 100000).slice(-8)}</span></div><div class="pxWin">${pxBackHTML(c, true)}</div></div>` : pxBackHTML(c))
     : `<img src="${graded(c) ? 'images/brand/back-graded.webp' : 'images/brand/back.webp'}" alt="Card back">`;
   return `<div class="v3d${graded(c) ? ' isSlab' : ''}${c.sport ? ' isSp' : ''}" style="--ar:${faceAR(c)}"><div class="v3dIn">
-    <div class="f3 front3">${frontHTML(c)}<i class="glare"></i></div>
+    <div class="f3 front3">${frontHTML(c, sn)}<i class="glare"></i></div>
     <div class="f3 back3">${back}</div></div><i class="shadow3"></i></div>`;
 }
 function attach3d(root){
@@ -704,9 +742,9 @@ function showResults(){
   st.classList.add('resMode');
   SB().innerHTML = `<div class="res">
     <div class="resTop"><button class="topX" id="closeRes" aria-label="Close">✕</button></div>
-    <div class="resCard">${card3dHTML(c)}</div>
+    <div class="resCard">${card3dHTML(c, cur.serial)}</div>
     <div class="resVal" id="rv" style="--vc:${cur.jackpot ? '255,215,60' : tierRGB(cur.band)}">$0.00</div>
-    <div class="resName">${c.name}${c.sport ? ' · ' + c.vname + (c.serial ? ' ' + c.serial : '') : ' #' + c.num}</div>
+    <div class="resName">${c.name}${c.sport ? ' · ' + c.vname + (c.run ? ' ' + serTxt(c, cur.serial) : '') : ' #' + c.num}</div>
     <div class="resTier"><span class="tchip" style="--c:${cur.jackpot ? '255,215,60' : tierRGB(cur.band)}">${cur.jackpot ? 'Jackpot' : TIERS[cur.band].name + ' tier'}</span></div>
     <div class="meta tiny">Drag to tilt · tap the card to flip it</div>
     <div class="resBtns"><button class="sellB" id="sellPull">Sell · ${money(sellPrice(c))}</button><button class="keepB" id="keep">Keep</button></div>
@@ -717,7 +755,7 @@ function showResults(){
   const count = now => { const f = Math.min(1, (now - t0) / D); rv.textContent = money(c.value * (1 - Math.pow(1 - f, 3))); if (f < 1) requestAnimationFrame(count); };
   requestAnimationFrame(count);
   $('#keep').onclick = $('#closeRes').onclick = closeStage;
-  $('#sellPull').onclick = () => { sell([[c.id, 1]]); closeStage(); };
+  $('#sellPull').onclick = () => { sell([[c.id, 1, cur.serial]]); closeStage(); };
   $('#again').onclick = () => { closeStage(); openPack(lastPack, lastBoost, 1); };
 }
 function closeStage(){ const st = $('#stage'); st.className = 'stage'; st.innerHTML = ''; document.body.style.overflow = ''; document.body.classList.remove('opening'); renderCol(); renderBal(); renderProfile(); }
@@ -766,7 +804,7 @@ function renderHistory(){
   const hist = S.history || [];
   $('#history').innerHTML = hist.length ? `<div class="histList">${hist.slice(0, 100).map(h => { const sid = h.s || 'taloki', c = cardOf(sid, h.c), p = c && SETS[sid].PACKS.find(x => x.id === h.p); if (!c) return '';
       return `<div class="histRow" data-id="${c.id}" data-s="${sid}"><i class="hdot" style="--c:${TIERS[h.b] ? TIERS[h.b].rgb : '154,163,178'}"></i>
-        <div class="hMain"><b>${esc(c.name)}${c.sport ? ' <small>' + c.vname + '</small>' : ''}</b><span>${SETS[sid].name} · ${p ? p.name : 'Pack'}${h.m && h.m !== 'normal' ? ' · ' + (MODES[h.m] ? MODES[h.m].name : h.m) : ''}${h.g ? ' · Boost' : ''} · ${new Date(h.t).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})}</span></div>
+        <div class="hMain"><b>${esc(c.name)}${c.sport ? ' <small>' + c.vname + (c.run && h.sn ? ' ' + serTxt(c, h.sn) : '') + '</small>' : ''}</b><span>${SETS[sid].name} · ${p ? p.name : 'Pack'}${h.m && h.m !== 'normal' ? ' · ' + (MODES[h.m] ? MODES[h.m].name : h.m) : ''}${h.g ? ' · Boost' : ''} · ${new Date(h.t).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})}</span></div>
         <b class="hVal">${money(c.value)}</b></div>`; }).join('')}</div>` : `<div class="empty">Your pulls will show up here.</div>`;
   document.querySelectorAll('#history [data-id]').forEach(r => r.onclick = () => { if (S.cols[r.dataset.s][r.dataset.id]) showCard(+r.dataset.id, r.dataset.s); });
 }
@@ -821,6 +859,28 @@ function renderProfile(){
     S = Object.assign(fresh(), {v:3, vol:S.vol, hideInstall:S.hideInstall, set:S.set, pi:S.pi}); COL = S.cols[G.id];
     save(); renderBal(); renderPackInfo(); renderCol(); renderProfile(); toast('Everything was reset'); };
 }
+/* ---- keep every pack at a 92% average return in every set ----
+   Photo cards (and their rarity weights) shift the averages a little, so on start-up each pack's Gold tier
+   weighting is re-tuned until the average card value is exactly 92% of what you pay. Displayed odds don't change. */
+function calibrate(){
+  const keep = G;
+  for (const k in SETS) { G = SETS[k];
+    G.PACKS.forEach(p => Object.keys(MODES).forEach(m => [false, true].forEach(b => {
+      if (b && !boostOK(m)) return; const c = conf(p, m, b); if (!c || !c.odds[5]) return;
+      const target = 0.92 * cost(p, b), ev = sk => { const old = c.skew; c.skew = sk; const v = packStats(p, m, b).ev; c.skew = old; return v; };
+      let lo = -8, hi = 40; if (ev(lo) < target || ev(hi) > target) return;
+      for (let i = 0; i < 60; i++) { const mid = (lo + hi) / 2; ev(mid) > target ? lo = mid : hi = mid; }
+      c.skew = (lo + hi) / 2;
+    }))); }
+  G = keep;
+}
+calibrate();
+/* cards owned from before serial numbers existed get numbers now */
+for (const k in SETS) for (const id in S.cols[k]) { const c = SETS[k].CARD[id]; if (!c || !c.run) continue;
+  const L = serList(k, id), q = S.cols[k][id];
+  while (L.length > q) L.pop();
+  while (L.length < q) { if (L.length >= c.run) { L.push(L[0]); continue; } assignSerial(c); } }
+save();
 applySet(G.id); showView('packs');
 setTimeout(() => { const sp = $('#splash'); if (sp) { sp.classList.add('out'); setTimeout(() => sp.remove(), 600); } }, RM() ? 0 : 900);
 

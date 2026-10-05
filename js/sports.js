@@ -92,6 +92,26 @@ const SPORT_RAR = {
 };
 const SPORT_GRADE = {10:'PAX 10 Gem Mint', 9:'PAX 9 Mint', 8:'PAX 8 NM-MT'};
 
+
+/* ============ PHOTO CARDS (your uploaded art) ============
+   Extra NFL cards drawn from your images in images/nfl/cards/. run = print run (0 = unnumbered short print).
+   The printed number was removed from each image; ser = [center x %, center y %, digit height % of width, color]
+   is where the game prints the live serial number instead. Lower print runs are much rarer (see RUN_WEIGHT). */
+const NFL_PHOTO_CARDS = [
+  {name:"Cam Ward", pos:'QB', team:'TEN', rc:1, r:'X', value:18750, run:1, vname:'Metal Auto', auto:1, patch:0, img:{"src": "images/nfl/cards/cam-ward-leaf-metal-auto-1of1.webp", "ar": 0.66667, "ser": [76.8, 61.0, 3.9, "goldDark"]}},
+  {name:"Patrick Mahomes", pos:'QB', team:'KC', rc:1, r:'X', value:46500, run:5, vname:'Rookie Patch Auto', auto:1, patch:1, img:{"src": "images/nfl/cards/patrick-mahomes-rpa-5.webp", "ar": 0.66667, "ser": [76.61, 57.58, 4.6, "gold"]}},
+  {name:"Tom Brady", pos:'QB', team:'NE', rc:0, r:'X', value:39000, run:5, vname:'Patch Auto', auto:1, patch:1, img:{"src": "images/nfl/cards/tom-brady-patch-auto-5.webp", "ar": 0.66667, "ser": [19.4, 21.4, 2.8, "gold"]}},
+  {name:"Jahmyr Gibbs", pos:'RB', team:'DET', rc:0, r:'P', value:8900, run:5, vname:'Patch Auto', auto:1, patch:1, img:{"src": "images/nfl/cards/jahmyr-gibbs-patch-auto-5.webp", "ar": 0.66667, "ser": [21.29, 20.48, 2.6, "gold"]}},
+  {name:"Ja'Marr Chase", pos:'WR', team:'CIN', rc:1, r:'P', value:4850, run:25, vname:'Origins Auto', auto:1, patch:0, img:{"src": "images/nfl/cards/jamarr-chase-origins-auto-25.webp", "ar": 0.66667, "ser": [84.47, 74.64, 3.0, "goldDark"]}},
+  {name:"Justin Jefferson", pos:'WR', team:'MIN', rc:1, r:'A', value:2150, run:50, vname:'Prizm Gold', auto:0, patch:0, img:{"src": "images/nfl/cards/justin-jefferson-prizm-gold-50.webp", "ar": 0.66667, "ser": [73.19, 74.5, 3.9, "gold"]}},
+  {name:"Cam Ward", pos:'QB', team:'TEN', rc:1, r:'A', value:1180, run:50, vname:'Chrome Gold', auto:0, patch:0, img:{"src": "images/nfl/cards/cam-ward-chrome-gold-50.webp", "ar": 0.66667, "ser": [79.3, 75.5, 4.4, "gold"]}},
+  {name:"Cam Ward", pos:'QB', team:'TEN', rc:1, r:'A', value:890, run:0, vname:'Downtown', auto:0, patch:0, img:{"src": "images/nfl/cards/cam-ward-downtown.webp", "ar": 0.66667}},
+  {name:"Matthew Stafford", pos:'QB', team:'LAR', rc:0, r:'A', value:640, run:25, vname:'Prestige', auto:0, patch:0, img:{"src": "images/nfl/cards/matthew-stafford-prestige-25.webp", "ar": 0.66667, "ser": [81.01, 23.89, 4.4, "goldDark"]}},
+  {name:"Cam Ward", pos:'QB', team:'TEN', rc:1, r:'E', value:64.5, run:299, vname:'Donruss', auto:0, patch:0, img:{"src": "images/nfl/cards/cam-ward-donruss-299.webp", "ar": 0.66667, "ser": [79.6, 74.5, 4.7, "dark"]}}
+];
+/* how often a card shows up compared with other cards in its tier: lower print run = rarer */
+const RUN_WEIGHT = run => run === 1 ? 0.01 : run <= 5 ? 0.15 : run <= 25 ? 0.4 : run <= 50 ? 0.6 : run === 0 ? 0.5 : 1;
+
 function buildSportSet(id, cfg){
   const RAR = JSON.parse(JSON.stringify(SPORT_RAR));
   const BY = {C:[],U:[],R:[],E:[],A:[],P:[],X:[]}, CARDS = [];
@@ -110,15 +130,25 @@ function buildSportSet(id, cfg){
         auto: 'APX'.includes(r), patch: 'PX'.includes(r), vname: RAR[r].name,
         el:{name: pl.team, icon:''}};
       if (s.grade && (s.slab ? !s.slab.raw : true)) c.grade = s.grade;
-      if (r === 'X') c.serial = '1/1';
-      else if (run) c.serial = String(1 + Math.floor(rnd() * run)).padStart(String(run).length, '0') + '/' + run;
+      if (run) c.run = run;               // numbered: each copy gets its own serial when pulled
       CARDS.push(c); BY[r].push(c);
     });
   }
+  (cfg.photo || []).forEach(pc => {        // photo cards join their tier
+    let pl = P.find(x => x.name === pc.name);
+    if (!pl) { pl = {name: pc.name, pos: pc.pos, team: pc.team, rc: !!pc.rc, rank: P.length, c: TEAMS[id][pc.team] || ['#333','#999']}; P.push(pl); }
+    const c = {id: ++cid, n: ++n, set:id, r: pc.r, name: pc.name, pos: pc.pos, team: pc.team, tc: pl.c, rc: !!pc.rc, rank: pl.rank,
+      value: pc.value, sport: cfg.sport, auto: !!pc.auto, patch: !!pc.patch, vname: pc.vname, img: pc.img, photo: true,
+      w: RUN_WEIGHT(pc.run), el:{name: pc.team, icon:''}};
+    if (pc.run) c.run = pc.run;
+    CARDS.push(c); BY[pc.r].push(c); RAR[pc.r].count++;
+  });
   CARDS.forEach(c => c.num = String(c.n).padStart(3, '0'));
   const CARD = Object.fromEntries(CARDS.map(c => [c.id, c]));
   // same seven price points and odds as Taloki, new names and looks
-  const PACKS = SETS.taloki.PACKS.map((tp, i) => Object.assign({}, tp, cfg.packs[i], {id: id + '-' + tp.id, cover: cfg.packs[i].cover || null}));
+  const cloneMode = md => md && Object.assign({}, md, md.boost ? {boost: Object.assign({}, md.boost)} : {});
+  const PACKS = SETS.taloki.PACKS.map((tp, i) => Object.assign({}, tp, cfg.packs[i], {id: id + '-' + tp.id, cover: cfg.packs[i].cover || null},
+    {normal: cloneMode(tp.normal), high: cloneMode(tp.high), max: cloneMode(tp.max), fifty: cloneMode(tp.fifty)}));
   return {id, sport: cfg.sport, sportName: cfg.sportName, name: cfg.name, setName: cfg.setName, eyebrow: cfg.eyebrow, headline: cfg.headline,
     packLabel: cfg.packLabel, chaseLabel:'Auto+', chaseNames:'Auto, Patch Auto and One of One', altView:'Players',
     RAR, ORDER:['C','U','R','E','A','P','X'], CARDS, BY, CARD, PACKS, GRADE: SPORT_GRADE, players: P};
@@ -137,7 +167,7 @@ const SPORT_PACKS = [
 
 SETS.nfl = buildSportSet('nfl', {
   sport:'football', sportName:'Football', name:'NFL', setName:'PAX Football 2026', eyebrow:'Football · 2026 Series',
-  headline:'Rip packs.<br>Pull the stars.', packLabel:'Football 2026', players: NFL_PLAYERS, art: NFL_ART,
+  headline:'Rip packs.<br>Pull the stars.', packLabel:'Football 2026', players: NFL_PLAYERS, art: NFL_ART, photo: NFL_PHOTO_CARDS,
   packs: SPORT_PACKS.map(p => Object.assign({}, p))
 });
 SETS.nba = buildSportSet('nba', {

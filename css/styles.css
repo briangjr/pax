@@ -1093,3 +1093,22 @@ body[data-view="packs"] .toast{bottom:auto;top:calc(66px + env(safe-area-inset-t
 .soldTag{position:absolute;padding:4px 10px;border-radius:999px;background:#fff;color:#0A0B0D;font-weight:800;font-size:.75rem}
 .resMulti .resVal{font-size:clamp(2.4rem,11vw,3.2rem)}
 .sellB[disabled]{opacity:.5}
+
+/* =====================================================================
+   v11 — photo cards with live serial numbers
+   ===================================================================== */
+.imgCard{position:relative;width:100%;aspect-ratio:var(--ar);container-type:inline-size;user-select:none}
+.imgCard img{width:100%;height:100%;object-fit:contain;display:block;filter:drop-shadow(0 10px 18px rgba(0,0,0,.55));-webkit-user-drag:none}
+.imgCard .qty{z-index:3}
+.imgSer{position:absolute;transform:translate(-50%,-50%);font-family:"Oswald","Sora",sans-serif;font-weight:500;line-height:1;letter-spacing:.09em;white-space:nowrap;pointer-events:none;z-index:2}
+.imgSer.gold{background:linear-gradient(180deg,#FFF0B8 0%,#E8C25A 45%,#B98A2C 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 .2cqw .4cqw rgba(0,0,0,.45))}
+.imgSer.goldDark{background:linear-gradient(180deg,#D9B65C 0%,#A8812F 55%,#7A5A1E 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.imgSer.dark{color:#2A2424;font-weight:400}
+.f3 .imgCard,.pfit .imgCard{width:100%;height:100%}
+.v3d .f3 .imgCard img{width:100%!important;height:100%!important;object-fit:contain}
+.imgBack{position:relative;width:100%;height:100%;border-radius:4%;background:linear-gradient(160deg,rgba(255,255,255,.35),rgba(255,255,255,.08) 45%,rgba(255,255,255,.22));
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.45),inset 0 0 0 6px rgba(0,0,0,.25)}
+.imgBackCard{position:absolute;left:8%;right:8%;top:10%;bottom:9%}
+.imgBackCard .pxBack{width:100%;height:100%}
+.wiCard .imgCard{width:44px}
+.evoSlot .imgCard,.grid .imgCard,.bpCard .imgCard{cursor:pointer}
