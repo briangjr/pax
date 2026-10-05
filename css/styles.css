@@ -944,3 +944,152 @@ body.sheetOpen{overflow:hidden}
 .pkItem .pack .pname{padding-bottom:10%}
 body[data-view="packs"] .toast{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
 body[data-view="packs"] .toast{bottom:auto;top:calc(66px + env(safe-area-inset-top,0px))}
+
+/* =====================================================================
+   v10 — new pack art (fancier each tier), quantity picker, multi-pack opening
+   ===================================================================== */
+.pack.pk2{container-type:inline-size;padding:0;justify-content:flex-end;isolation:isolate;overflow:hidden;color:#fff;
+  background-image:var(--pk)!important;background-size:cover!important;background-color:#05060A}
+.pack.pk2.hasCover{background-image:var(--packimg)!important}
+.pk2 .pkBg,.pk2 .pkBand,.pk2 .pkHolo,.pk2 .pkFrame,.pk2 .pkSpark{position:absolute;inset:0;pointer-events:none}
+.pk2 .pkBg{z-index:0}
+.pk2 .pkBand{z-index:1}
+.pk2 .pkHolo{z-index:2}
+.pk2 .pkFrame{z-index:3}
+.pk2 .pkSpark{z-index:6}
+.pk2 .tearTop{z-index:7}.pk2 .crimp{z-index:8}
+.pk2::before{z-index:5}
+.pk2 .pkBrand{position:absolute;z-index:4;top:15%;left:8%;font-family:"Anton","Sora",sans-serif;font-size:6.4cqw;letter-spacing:.32em;color:rgba(255,255,255,.88);text-shadow:0 .5cqw 2cqw rgba(0,0,0,.45)}
+.pack.pk2 .gem{position:absolute;z-index:4;top:14%;right:7%;margin:0;padding:1cqw 3.4cqw;font-size:6.2cqw;font-family:var(--display);font-weight:700;letter-spacing:.02em;
+  border-radius:99px;background:rgba(0,0,0,.45);border:.5cqw solid rgba(255,255,255,.45);backdrop-filter:none}
+.pk2 .pkEmb{position:absolute;z-index:4;left:50%;top:27%;width:50cqw;aspect-ratio:1;transform:translateX(-50%);display:grid;place-items:center}
+.pk2 .pkRing{position:absolute;inset:6%;border-radius:50%;border:1.6cqw solid rgba(255,255,255,.75);box-shadow:0 2cqw 6cqw rgba(0,0,0,.4),inset 0 0 0 1cqw rgba(0,0,0,.18)}
+.pk2 .pkIcon{position:relative;width:64%;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;overflow:hidden;background:rgba(0,0,0,.38);color:#fff}
+.pk2 .pkIcon img{width:100%;height:100%;object-fit:cover}
+.pk2 .pkIcon svg{width:72%;height:72%;fill:none;stroke:currentColor;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
+.pack.pk2 .pname{position:absolute;z-index:4;left:0;right:0;bottom:4.5%;padding:9cqw 4cqw 5cqw;background:linear-gradient(transparent,rgba(0,0,0,.78) 55%)}
+.pack.pk2 .pname b{font-size:10.5cqw;line-height:1.02;letter-spacing:.01em}
+.pack.pk2 .pname small{font-size:5cqw;margin-top:1.2cqw;letter-spacing:.06em;text-transform:uppercase;opacity:.75}
+.pk2.hasCover .pname{background:linear-gradient(transparent,rgba(0,0,0,.6))}
+
+/* tier 0: clean matte foil */
+.pk2.t0 .pkBg{background:repeating-linear-gradient(135deg,rgba(255,255,255,.07) 0 .6cqw,transparent .6cqw 4cqw),linear-gradient(180deg,rgba(255,255,255,.12),transparent 40%,rgba(0,0,0,.35))}
+/* tier 1: diagonal color band */
+.pk2 .pkBand{top:50%;bottom:auto;height:30%;transform:skewY(-14deg);transform-origin:left;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--glow) 70%,#fff),var(--glow) 45%,color-mix(in srgb,var(--glow) 60%,#000));
+  box-shadow:0 -1cqw 0 rgba(255,255,255,.55),0 1cqw 0 rgba(255,255,255,.35),0 4cqw 10cqw rgba(0,0,0,.35)}
+.pk2.t1 .pkBg{background:linear-gradient(160deg,rgba(255,255,255,.16),transparent 45%),repeating-linear-gradient(90deg,rgba(255,255,255,.04) 0 1px,transparent 1px 3cqw)}
+/* tier 2: metallic chevrons, double ring */
+.pk2.t2 .pkBg{background:
+  repeating-linear-gradient(45deg,rgba(255,255,255,.09) 0 1.2cqw,transparent 1.2cqw 7cqw),repeating-linear-gradient(-45deg,rgba(0,0,0,.12) 0 1.2cqw,transparent 1.2cqw 7cqw),
+  linear-gradient(180deg,rgba(255,255,255,.22),transparent 35%,rgba(0,0,0,.4))}
+.pk2.t2 .pkBand{height:22%;top:56%;background:repeating-linear-gradient(90deg,rgba(255,255,255,.18) 0 .8cqw,transparent .8cqw 2.4cqw),linear-gradient(90deg,#fff,var(--glow) 30%,color-mix(in srgb,var(--glow) 55%,#000))}
+.pk2.t2 .pkRing,.pk2.t3 .pkRing{border-width:1.2cqw;box-shadow:0 0 0 1.8cqw rgba(0,0,0,.25),0 0 0 2.6cqw rgba(255,255,255,.55),0 3cqw 8cqw rgba(0,0,0,.45)}
+/* tier 3: starfield, light rays, glowing emblem */
+.pk2.t3 .pkBg{background:
+  radial-gradient(circle,rgba(255,255,255,.75) .45cqw,transparent .7cqw) 0 0/11cqw 11cqw,
+  radial-gradient(circle,rgba(255,255,255,.4) .35cqw,transparent .6cqw) 5cqw 6cqw/13cqw 13cqw,
+  radial-gradient(70% 45% at 50% 40%,color-mix(in srgb,var(--glow) 55%,transparent),transparent 70%),
+  linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.45))}
+.pk2.t3 .pkBand{opacity:.85;height:16%;top:62%}
+.pk2 .pkRays{position:absolute;inset:-45%;border-radius:50%;pointer-events:none;
+  background:repeating-conic-gradient(rgba(255,255,255,.28) 0 5deg,transparent 5deg 15deg);
+  -webkit-mask:radial-gradient(circle,#000 18%,transparent 68%);mask:radial-gradient(circle,#000 18%,transparent 68%);animation:spinR 14s linear infinite}
+@keyframes spinR{to{transform:rotate(360deg)}}
+.pk2.t3 .pkIcon,.pk2.t4 .pkIcon{box-shadow:0 0 6cqw 1cqw color-mix(in srgb,var(--glow) 80%,#fff)}
+/* tier 4: rainbow holo foil, rainbow ring, sparkles */
+.pk2 .pkHolo{mix-blend-mode:color-dodge;opacity:.55;background:linear-gradient(115deg,transparent 10%,rgba(255,90,200,.6) 25%,rgba(255,230,120,.6) 38%,rgba(110,255,200,.6) 52%,rgba(110,170,255,.6) 66%,rgba(200,120,255,.6) 80%,transparent 92%);
+  background-size:260% 100%;animation:foil 4s linear infinite}
+.pk2.t4 .pkBg{background:
+  repeating-linear-gradient(60deg,rgba(255,255,255,.08) 0 .5cqw,transparent .5cqw 3cqw),repeating-linear-gradient(-60deg,rgba(255,255,255,.08) 0 .5cqw,transparent .5cqw 3cqw),
+  radial-gradient(70% 45% at 50% 40%,rgba(255,255,255,.25),transparent 70%)}
+.pk2.t4 .pkBand{display:none}
+.pk2.t4 .pkRing,.pk2.t6 .pkRing{border:0;background:conic-gradient(#FF4FB0,#FFD84F,#4FFFC0,#4FB4FF,#B44FFF,#FF4FB0);
+  -webkit-mask:radial-gradient(circle,transparent 60%,#000 61%);mask:radial-gradient(circle,transparent 60%,#000 61%);animation:spinR 6s linear infinite;box-shadow:none}
+.pk2 .pkSpark i{position:absolute;width:4.4cqw;aspect-ratio:1;background:#fff;clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);
+  filter:drop-shadow(0 0 1.5cqw #fff);animation:twinkleP 2.4s ease-in-out infinite;opacity:0}
+@keyframes twinkleP{0%,100%{opacity:0;transform:scale(.3) rotate(0)}50%{opacity:1;transform:scale(1) rotate(45deg)}}
+/* tier 5: black and gold, art-deco fan, gold frame */
+.pk2.t5{color:#FFE9A8}
+.pk2.t5 .pkBg{background:
+  repeating-conic-gradient(from 180deg at 50% 112%,rgba(255,214,120,.22) 0 1.5deg,transparent 1.5deg 7deg),
+  radial-gradient(80% 50% at 50% 38%,rgba(255,215,120,.28),transparent 70%),linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.6))}
+.pk2.t5 .pkBand{display:none}
+.pk2.t5 .pkHolo{opacity:.25}
+.pk2 .pkFrame{inset:6% 5.5% 6%;border-radius:2cqw;border:1.2cqw solid transparent;
+  background:linear-gradient(#0000,#0000) padding-box,linear-gradient(160deg,#FFF3C4,#C9A24C 30%,#7A5A1E 50%,#F7E3A1 70%,#B8913A) border-box;
+  -webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
+  box-shadow:inset 0 0 0 .5cqw rgba(0,0,0,.4)}
+.pk2.t5 .pkRing{border:0;background:conic-gradient(from 20deg,#FFF3C4,#C9A24C,#7A5A1E,#F7E3A1,#C9A24C,#FFF3C4);
+  -webkit-mask:radial-gradient(circle,transparent 58%,#000 59%);mask:radial-gradient(circle,transparent 58%,#000 59%);
+  filter:drop-shadow(0 0 3cqw rgba(255,210,110,.6))}
+.pk2.t5 .pkRays{background:repeating-conic-gradient(rgba(255,215,120,.38) 0 4deg,transparent 4deg 12deg)}
+.pk2.t5 .pkIcon{background:radial-gradient(circle,#2A2216,#0A0805);color:#F7E3A1;box-shadow:0 0 0 1cqw rgba(0,0,0,.6),0 0 8cqw rgba(255,210,110,.55)}
+.pk2.t5 .pkBrand,.pk2.t5 .pname b{background:linear-gradient(180deg,#FFF6D2,#E8C25A 50%,#A87C28);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pk2.t5 .gem{background:linear-gradient(180deg,#FFF3C4,#C9A24C);color:#1A1406;border-color:#FFF3C4}
+.pk2.t5 .pkSpark i{background:#FFE9A8;filter:drop-shadow(0 0 1.5cqw #FFD36A)}
+/* tier 6: the best pack — prismatic crystal, animated rainbow frame, rays, lots of sparkle */
+.pk2.t6{box-shadow:0 0 0 1px rgba(255,255,255,.5) inset,0 18px 50px -12px var(--glow),0 0 40px -6px rgba(180,140,255,.55)!important;animation:auraHue 6s linear infinite}
+@keyframes auraHue{50%{box-shadow:0 0 0 1px rgba(255,255,255,.5) inset,0 18px 50px -12px var(--glow),0 0 46px -4px rgba(120,220,255,.65)}}
+.pk2.t6 .pkBg{background:
+  conic-gradient(from 20deg at 28% 30%,rgba(255,255,255,.22),transparent 25%,rgba(255,255,255,.12) 40%,transparent 60%,rgba(255,255,255,.2) 80%,transparent),
+  conic-gradient(from 200deg at 74% 68%,rgba(255,255,255,.18),transparent 20%,rgba(0,0,0,.25) 45%,transparent 65%,rgba(255,255,255,.15)),
+  linear-gradient(135deg,transparent 48%,rgba(255,255,255,.25) 49.5%,transparent 51%),linear-gradient(45deg,transparent 48%,rgba(255,255,255,.18) 49.5%,transparent 51%),
+  radial-gradient(80% 50% at 50% 38%,rgba(190,170,255,.4),transparent 70%)}
+.pk2.t6 .pkBand{display:none}
+.pk2.t6 .pkHolo{opacity:.8;animation-duration:2.6s}
+.pk2.t6 .pkFrame{border-width:1.4cqw;background:linear-gradient(#0000,#0000) padding-box,conic-gradient(from 0deg,#FF4FB0,#FFD84F,#4FFFC0,#4FB4FF,#B44FFF,#FF4FB0) border-box;animation:hue 4s linear infinite;
+  box-shadow:inset 0 0 0 .6cqw rgba(255,255,255,.6),0 0 4cqw rgba(255,255,255,.35)}
+.pk2.t6 .pkRays{inset:-60%;background:repeating-conic-gradient(rgba(255,120,220,.35) 0 4deg,transparent 4deg 10deg,rgba(120,220,255,.35) 10deg 14deg,transparent 14deg 20deg);animation-duration:9s}
+.pk2.t6 .pkIcon{background:radial-gradient(circle at 35% 30%,#FFFFFF,#C9D2E6 35%,#1A1D2A 75%);color:#0A0B12;box-shadow:0 0 0 1cqw rgba(255,255,255,.7),0 0 10cqw rgba(200,170,255,.9)}
+.pk2.t6 .pkIcon img{filter:saturate(1.2) contrast(1.05)}
+.pk2.t6 .pkBrand{background:linear-gradient(90deg,#FFB3E6,#FFF4B3,#B3FFE9,#B3D4FF,#E3B3FF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pk2.t6 .pname b{background:linear-gradient(90deg,#FFFFFF,#FFD6F2 25%,#FFFFFF 45%,#C8F4FF 65%,#FFFFFF);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:foil 3s linear infinite}
+.pk2.t6 .gem{background:linear-gradient(90deg,#FF4FB0,#FFD84F,#4FFFC0,#4FB4FF,#B44FFF);color:#fff;border-color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.pk2.t6 .pkSpark i{width:5cqw}
+.pk2.t6 .pkSpark i:nth-child(3n){width:3cqw;background:#FFE7F6}.pk2.t6 .pkSpark i:nth-child(3n+1){background:#E6FBFF}
+/* tiny pack icon in sheets */
+.ssIco .pk2 .pname,.ssIco .pk2 .gem,.ssIco .pk2 .pkBrand,.ssIco .pk2 .pkSpark{display:none}
+
+/* main screen: two stats + quantity picker */
+.pkStats{grid-template-columns:1fr 1fr;border-top:1px solid rgba(255,255,255,.12);padding-top:12px}
+.qtySeg{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:100%}
+.qtySeg button{height:40px;border-radius:999px;border:1.5px solid rgba(255,255,255,.14);color:#C9CDD3;font-family:var(--display);font-weight:600;font-size:.92rem}
+.qtySeg button.on{border-color:#fff;color:#0A0B0D;background:#fff}
+
+/* rip: stacked packs when opening several */
+.bigpack.stacked{isolation:isolate}
+.stackB{position:absolute;inset:0;border-radius:12px;background:var(--glow,#888);background:linear-gradient(160deg,rgba(255,255,255,.35),rgba(255,255,255,.08));
+  border:1px solid rgba(255,255,255,.3);transform:translate(12px,-10px) rotate(6deg);z-index:-1;transition:opacity .3s}
+.stackB.s2{transform:translate(-12px,-6px) rotate(-6deg)}
+.bigpack.rise .stackB{animation:packDrop .5s ease-in forwards}
+.qtyBadge{position:absolute;top:-14px;right:-14px;z-index:9;min-width:48px;height:48px;padding:0 10px;border-radius:999px;display:grid;place-items:center;
+  font-family:var(--display);font-weight:700;font-size:1.2rem;background:#fff;color:#0A0B0D;box-shadow:0 8px 20px -6px rgba(0,0,0,.8)}
+
+/* multi spin + reveal */
+.mGrid{--cw:min(27vw,118px);display:flex;flex-direction:column;align-items:center;gap:16px;width:100%}
+.mGrid.c2{--cw:min(40vw,168px)}
+.mRow{display:flex;justify-content:center;gap:12px}
+.mCell{width:var(--cw);display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
+.mSlot{position:relative;width:100%;aspect-ratio:5/7}
+.myst.mini{width:100%;animation:none}
+.myst.mini .mf{box-shadow:inset 0 0 0 2px rgba(255,255,255,.55),0 0 26px rgba(var(--tc),.55)}
+.mFace{position:absolute;inset:0;display:grid;place-items:center;border-radius:6%/4.3%}
+.mFace.zap{animation:zap 1.1s ease-out}
+.mLbl{min-height:2.4em;text-align:center;line-height:1.15;max-width:100%}
+.mLbl b{display:block;font-family:var(--display);font-weight:700;font-size:1rem;text-shadow:0 0 12px rgba(var(--tc),.9)}
+.mLbl span{display:block;font-size:.7rem;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:var(--cw)}
+.mActs{min-height:52px;display:flex;justify-content:center;width:100%}
+.mActs .pickBtn{max-width:240px}
+/* multi results */
+.resMulti{gap:8px}
+.rGrid{margin:40px 0 6px}
+.rGrid.c2{--cw:min(38vw,160px)}
+.rCell{width:var(--cw);display:flex;flex-direction:column;align-items:center;gap:3px;color:#fff;text-align:center}
+.rSlot{position:relative;width:100%;aspect-ratio:5/7;display:grid;place-items:center;filter:drop-shadow(0 10px 14px rgba(0,0,0,.6))}
+.rCell b{font-family:var(--display);font-weight:700;font-size:.95rem;text-shadow:0 0 10px rgba(var(--tc),.8)}
+.rCell span{font-size:.68rem;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.rCell.sold .rSlot{opacity:.35}
+.soldTag{position:absolute;padding:4px 10px;border-radius:999px;background:#fff;color:#0A0B0D;font-weight:800;font-size:.75rem}
+.resMulti .resVal{font-size:clamp(2.4rem,11vw,3.2rem)}
+.sellB[disabled]{opacity:.5}
