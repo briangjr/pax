@@ -1117,3 +1117,30 @@ body[data-view="packs"] .toast{bottom:auto;top:calc(66px + env(safe-area-inset-t
 .peelWrap.mini{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto;cursor:grab}
 .peelWrap.mini .pflapWrap{filter:drop-shadow(-3px 3px 4px rgba(0,0,0,.55))}
 .peelWrap.mini .mEye{width:38%}
+
+/* v12 — tier 7: the $1500 pack (inherits tier 6, then goes further) */
+.pk2.t7{box-shadow:0 0 0 1px rgba(255,236,170,.8) inset,0 20px 60px -10px rgba(232,194,90,.9),0 0 60px -4px rgba(255,215,120,.65)!important;animation:auraGold 3s ease-in-out infinite}
+@keyframes auraGold{50%{box-shadow:0 0 0 1px rgba(255,236,170,.9) inset,0 20px 70px -8px rgba(232,194,90,1),0 0 80px 0 rgba(200,160,255,.6)}}
+.pk2.t7 .pkBg{background:
+  repeating-conic-gradient(from 0deg at 50% 40%,rgba(255,220,130,.16) 0 2deg,transparent 2deg 9deg),
+  radial-gradient(70% 45% at 50% 40%,rgba(255,225,150,.5),transparent 70%),
+  linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,.55))}
+.pk2.t7 .pkFrame{inset:4.5% 4% 4.5%;border-width:1.8cqw;background:linear-gradient(#0000,#0000) padding-box,conic-gradient(from 0deg,#FFF3C4,#C9A24C,#FF4FB0,#FFD84F,#4FFFC0,#4FB4FF,#B44FFF,#C9A24C,#FFF3C4) border-box;
+  box-shadow:inset 0 0 0 .6cqw rgba(0,0,0,.5),inset 0 0 0 1.4cqw rgba(255,236,170,.5),0 0 5cqw rgba(255,215,120,.5)}
+.pk2.t7 .pkRing{border:0;background:conic-gradient(from 0deg,#FFF3C4,#C9A24C,#FFF3C4,#FF4FB0,#4FB4FF,#FFF3C4);
+  -webkit-mask:radial-gradient(circle,transparent 56%,#000 57%);mask:radial-gradient(circle,transparent 56%,#000 57%);animation:spinR 4s linear infinite;filter:drop-shadow(0 0 3cqw rgba(255,215,120,.9))}
+.pk2.t7 .pkIcon{background:radial-gradient(circle at 35% 30%,#FFF8E0,#E8C25A 40%,#3A2A0A 80%);color:#1A1406;box-shadow:0 0 0 1cqw rgba(255,236,170,.8),0 0 12cqw rgba(255,210,110,.95)}
+.pk2.t7 .pkRays{background:repeating-conic-gradient(rgba(255,220,130,.45) 0 3deg,transparent 3deg 9deg,rgba(255,150,230,.3) 9deg 12deg,transparent 12deg 18deg);animation-duration:7s}
+.pk2.t7 .pkBrand,.pk2.t7 .pname b{background:linear-gradient(90deg,#FFF6D2,#E8C25A 30%,#FFFFFF 50%,#E8C25A 70%,#FFF6D2);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:foil 2.4s linear infinite}
+.pk2.t7 .gem{background:linear-gradient(180deg,#FFF6D2,#C9A24C);color:#1A1406;border-color:#FFF6D2;text-shadow:none}
+.pk2.t7 .pkSpark i{background:#FFF0C0;filter:drop-shadow(0 0 2cqw #FFD36A)}
+.pk2 .pkOrbit{position:absolute;z-index:4;left:50%;top:27%;width:62cqw;aspect-ratio:1;transform:translateX(-50%);border-radius:50%;pointer-events:none;
+  border:.5cqw dashed rgba(255,236,170,.65);animation:spinR 12s linear infinite reverse}
+.pk2 .pkBadge{position:absolute;z-index:6;left:50%;top:69%;transform:translateX(-50%);padding:1.2cqw 4cqw;border-radius:99px;white-space:nowrap;
+  font-family:"Anton","Sora",sans-serif;font-size:6cqw;letter-spacing:.2em;color:#1A1406;background:linear-gradient(180deg,#FFF6D2,#C9A24C);
+  box-shadow:0 0 0 .5cqw rgba(0,0,0,.4),0 0 5cqw rgba(255,215,120,.8)}
+.pk2.t7 .pname{padding-top:13cqw}
+.ssIco .pk2 .pkBadge,.ssIco .pk2 .pkOrbit{display:none}
+.ssOne{display:flex;justify-content:space-between;align-items:center;margin:4px 0 10px;padding:10px 14px;border-radius:12px;background:linear-gradient(90deg,rgba(232,194,90,.18),rgba(232,194,90,.05));border:1px solid rgba(232,194,90,.4)}
+.ssOne b{font-family:var(--display);font-weight:600;font-size:.86rem;color:#F3DC96}
+.ssOne span{font-family:var(--display);font-weight:700;color:#fff}

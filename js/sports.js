@@ -85,7 +85,7 @@ const SPORT_RAR = {
   X:{name:'One of One', count:10, run:1},
   P:{name:'Patch Auto', count:11, run:25},
   A:{name:'Auto',       count:25, run:99},
-  E:{name:'Gold',       count:10, run:10},
+  E:{name:'Gold',       count:10, run:99},
   R:{name:'Holo',       count:15, run:199},
   U:{name:'Silver',     count:25},
   C:{name:'Base',       count:40}
@@ -98,22 +98,22 @@ const SPORT_GRADE = {10:'PAX 10 Gem Mint', 9:'PAX 9 Mint', 8:'PAX 8 NM-MT'};
    The printed number was removed from each image; ser = [center x %, center y %, digit height as % of image width, color]
    is where the game prints the live serial number instead. Lower print runs are much rarer (see RUN_WEIGHT). */
 const NFL_PHOTO_CARDS = [
-  {name:"Cam Ward", pos:'QB', team:'TEN', rc:1, r:'X', value:18750, run:1, vname:'Metal Auto', auto:1, patch:0, img:{"src": "images/nfl/cards/cam-ward-leaf-metal-auto-1of1.webp", "ar": 0.66667, "ser": [76.8, 61.0, 4.0, "goldDark"]}},
-  {name:"Patrick Mahomes", pos:'QB', team:'KC', rc:1, r:'X', value:46500, run:5, vname:'Rookie Patch Auto', auto:1, patch:1, img:{"src": "images/nfl/cards/patrick-mahomes-rpa-5.webp", "ar": 0.66667, "ser": [76.61, 57.58, 3.71, "gold"]}},
-  {name:"Tom Brady", pos:'QB', team:'NE', rc:0, r:'X', value:39000, run:5, vname:'Patch Auto', auto:1, patch:1, img:{"src": "images/nfl/cards/tom-brady-patch-auto-5.webp", "ar": 0.66667, "ser": [19.4, 21.4, 3.66, "gold"]}},
-  {name:"Jahmyr Gibbs", pos:'RB', team:'DET', rc:0, r:'P', value:8900, run:5, vname:'Patch Auto', auto:1, patch:1, img:{"src": "images/nfl/cards/jahmyr-gibbs-patch-auto-5.webp", "ar": 0.66667, "ser": [21.29, 20.48, 4.0, "gold"]}},
+  {name:"Cam Ward", pos:'QB', team:'TEN', rc:1, r:'X', value:125000, run:1, vname:'Metal Auto', auto:1, patch:0, img:{"src": "images/nfl/cards/cam-ward-leaf-metal-auto-1of1.webp", "ar": 0.66667, "ser": [76.8, 61.0, 4.0, "goldDark"]}},
+  {name:"Patrick Mahomes", pos:'QB', team:'KC', rc:1, r:'X', value:65000, run:5, vname:'Rookie Patch Auto', auto:1, patch:1, img:{"src": "images/nfl/cards/patrick-mahomes-rpa-5.webp", "ar": 0.66667, "ser": [76.61, 57.58, 3.71, "gold"]}},
+  {name:"Tom Brady", pos:'QB', team:'NE', rc:0, r:'X', value:52000, run:5, vname:'Patch Auto', auto:1, patch:1, img:{"src": "images/nfl/cards/tom-brady-patch-auto-5.webp", "ar": 0.66667, "ser": [19.4, 21.4, 3.66, "gold"]}},
+  {name:"Jahmyr Gibbs", pos:'RB', team:'DET', rc:0, r:'P', value:24000, run:5, vname:'Patch Auto', auto:1, patch:1, img:{"src": "images/nfl/cards/jahmyr-gibbs-patch-auto-5.webp", "ar": 0.66667, "ser": [21.29, 20.48, 4.0, "gold"]}},
   {name:"Ja'Marr Chase", pos:'WR', team:'CIN', rc:1, r:'P', value:4850, run:25, vname:'Origins Auto', auto:1, patch:0, img:{"src": "images/nfl/cards/jamarr-chase-origins-auto-25.webp", "ar": 0.66667, "ser": [84.47, 74.64, 3.52, "goldDark"]}},
   {name:"Justin Jefferson", pos:'WR', team:'MIN', rc:1, r:'A', value:2150, run:50, vname:'Prizm Gold', auto:0, patch:0, img:{"src": "images/nfl/cards/justin-jefferson-prizm-gold-50.webp", "ar": 0.66667, "ser": [73.19, 74.5, 3.32, "gold"]}},
   {name:"Cam Ward", pos:'QB', team:'TEN', rc:1, r:'A', value:1180, run:50, vname:'Chrome Gold', auto:0, patch:0, img:{"src": "images/nfl/cards/cam-ward-chrome-gold-50.webp", "ar": 0.66667, "ser": [79.3, 75.5, 3.91, "gold"]}},
   {name:"Cam Ward", pos:'QB', team:'TEN', rc:1, r:'A', value:890, run:0, vname:'Downtown', auto:0, patch:0, img:{"src": "images/nfl/cards/cam-ward-downtown.webp", "ar": 0.66667}},
   {name:"Matthew Stafford", pos:'QB', team:'LAR', rc:0, r:'A', value:640, run:25, vname:'Prestige', auto:0, patch:0, img:{"src": "images/nfl/cards/matthew-stafford-prestige-25.webp", "ar": 0.66667, "ser": [81.01, 23.89, 3.61, "goldDark"]}},
   {name:"Cam Ward", pos:'QB', team:'TEN', rc:1, r:'E', value:64.5, run:299, vname:'Donruss', auto:0, patch:0, img:{"src": "images/nfl/cards/cam-ward-donruss-299.webp", "ar": 0.66667, "ser": [79.6, 74.5, 3.42, "dark"]}},
-  {name:"Caleb Williams", pos:'QB', team:'CHI', rc:1, r:'X', value:16500, run:5, vname:'Rookie Patch Auto', auto:1, patch:1, img:{"src": "images/nfl/cards/caleb-williams-rpa-5.webp", "ar": 0.66667, "ser": [22.46, 19.08, 4.0, "gold"]}},
-  {name:"Bo Nix", pos:'QB', team:'DEN', rc:1, r:'P', value:7400, run:5, vname:'Rookie Patch Auto', auto:1, patch:1, img:{"src": "images/nfl/cards/bo-nix-rpa-5.webp", "ar": 0.66667, "ser": [21.73, 20.61, 4.0, "gold"]}},
-  {name:"Aidan Hutchinson", pos:'EDGE', team:'DET', rc:0, r:'P', value:6800, run:5, vname:'Patch Auto', auto:1, patch:1, img:{"src": "images/nfl/cards/aidan-hutchinson-patch-auto-5.webp", "ar": 0.66667, "ser": [22.36, 21.09, 4.0, "gold"]}},
+  {name:"Caleb Williams", pos:'QB', team:'CHI', rc:1, r:'X', value:32000, run:5, vname:'Rookie Patch Auto', auto:1, patch:1, img:{"src": "images/nfl/cards/caleb-williams-rpa-5.webp", "ar": 0.66667, "ser": [22.46, 19.08, 4.0, "gold"]}},
+  {name:"Bo Nix", pos:'QB', team:'DEN', rc:1, r:'P', value:22500, run:5, vname:'Rookie Patch Auto', auto:1, patch:1, img:{"src": "images/nfl/cards/bo-nix-rpa-5.webp", "ar": 0.66667, "ser": [21.73, 20.61, 4.0, "gold"]}},
+  {name:"Aidan Hutchinson", pos:'EDGE', team:'DET', rc:0, r:'P', value:21000, run:5, vname:'Patch Auto', auto:1, patch:1, img:{"src": "images/nfl/cards/aidan-hutchinson-patch-auto-5.webp", "ar": 0.66667, "ser": [22.36, 21.09, 4.0, "gold"]}},
   {name:"Lamar Jackson", pos:'QB', team:'BAL', rc:0, r:'P', value:6200, run:25, vname:'Origins Auto', auto:1, patch:0, img:{"src": "images/nfl/cards/lamar-jackson-origins-auto-25.webp", "ar": 0.66667, "ser": [82.86, 73.34, 3.52, "goldDark"]}},
-  {name:"Myles Garrett", pos:'EDGE', team:'CLE', rc:0, r:'P', value:5600, run:5, vname:'Signature Auto', auto:1, patch:0, img:{"src": "images/nfl/cards/myles-garrett-auto-5.webp", "ar": 0.66667, "ser": [22.12, 20.67, 3.91, "gold"]}},
-  {name:"T.J. Watt", pos:'LB', team:'PIT', rc:0, r:'P', value:5200, run:5, vname:'Signature Auto', auto:1, patch:0, img:{"src": "images/nfl/cards/tj-watt-auto-5.webp", "ar": 0.66667, "ser": [22.75, 21.39, 3.71, "gold"]}},
+  {name:"Myles Garrett", pos:'EDGE', team:'CLE', rc:0, r:'P', value:20500, run:5, vname:'Signature Auto', auto:1, patch:0, img:{"src": "images/nfl/cards/myles-garrett-auto-5.webp", "ar": 0.66667, "ser": [22.12, 20.67, 3.91, "gold"]}},
+  {name:"T.J. Watt", pos:'LB', team:'PIT', rc:0, r:'P', value:20000, run:5, vname:'Signature Auto', auto:1, patch:0, img:{"src": "images/nfl/cards/tj-watt-auto-5.webp", "ar": 0.66667, "ser": [22.75, 21.39, 3.71, "gold"]}},
   {name:"Jaxon Smith-Njigba", pos:'WR', team:'SEA', rc:0, r:'A', value:2400, run:25, vname:'Origins Auto', auto:1, patch:0, img:{"src": "images/nfl/cards/jaxon-smith-njigba-origins-auto-25.webp", "ar": 0.66667, "ser": [82.67, 74.71, 3.32, "goldDark"]}},
   {name:"Derrick Henry", pos:'RB', team:'BAL', rc:0, r:'A', value:580, run:25, vname:'Prestige', auto:0, patch:0, img:{"src": "images/nfl/cards/derrick-henry-prestige-25.webp", "ar": 0.66667, "ser": [81.01, 21.87, 3.71, "goldDark"]}},
   {name:"Jared Goff", pos:'QB', team:'DET', rc:0, r:'A', value:520, run:25, vname:'Prestige', auto:0, patch:0, img:{"src": "images/nfl/cards/jared-goff-prestige-25.webp", "ar": 0.66667, "ser": [81.05, 23.89, 3.61, "goldDark"]}},
@@ -150,6 +150,8 @@ const NFL_PHOTO_CARDS = [
   {name:"C.J. Stroud", pos:'QB', team:'HOU', rc:0, r:'C', value:1.1, vname:'Topps Base', auto:0, patch:0, img:{"src": "images/nfl/cards/cj-stroud-topps-base.webp", "ar": 0.66667, "raw": true}}
 ];
 /* how often a card shows up compared with other cards in its tier: lower print run = rarer */
+/* built-in One of One values, best player first (minimum $100,000) */
+const ONE_OF_ONE_VALUES = [285000, 260000, 240000, 220000, 200000, 180000, 165000, 150000, 130000, 110000];
 const RUN_WEIGHT = run => run === 1 ? 0.01 : run <= 5 ? 0.15 : run <= 25 ? 0.4 : run <= 50 ? 0.6 : run === 0 ? 0.5 : 1;
 
 function buildSportSet(id, cfg){
@@ -170,7 +172,8 @@ function buildSportSet(id, cfg){
         auto: 'APX'.includes(r), patch: 'PX'.includes(r), vname: RAR[r].name,
         el:{name: pl.team, icon:''}};
       if (s.grade && (s.slab ? !s.slab.raw : true)) c.grade = s.grade;
-      if (run) c.run = run;               // numbered: each copy gets its own serial when pulled
+      if (r === 'X') { c.value = ONE_OF_ONE_VALUES[i]; c.grade = 10; }   // every 1/1 is worth $100,000+
+      if (run) { c.run = run; c.w = RUN_WEIGHT(run); }               // numbered: each copy gets its own serial when pulled
       CARDS.push(c); BY[r].push(c);
     });
   }
@@ -186,9 +189,15 @@ function buildSportSet(id, cfg){
   CARDS.forEach(c => c.num = String(c.n).padStart(3, '0'));
   const CARD = Object.fromEntries(CARDS.map(c => [c.id, c]));
   // same seven price points and odds as Taloki, new names and looks
-  const cloneMode = md => md && Object.assign({}, md, md.boost ? {boost: Object.assign({}, md.boost)} : {});
+  const cloneMode = md => md && Object.assign({}, md, {jackpot: Object.assign({}, md.jackpot)}, md.boost ? {boost: Object.assign({}, md.boost, {jackpot: Object.assign({}, md.boost.jackpot)})} : {});
   const PACKS = SETS.taloki.PACKS.map((tp, i) => Object.assign({}, tp, cfg.packs[i], {id: id + '-' + tp.id, cover: cfg.packs[i].cover || null},
     {normal: cloneMode(tp.normal), high: cloneMode(tp.high), max: cloneMode(tp.max), fifty: cloneMode(tp.fifty)}));
+  /* the top cards here are worth far more than Taloki's, so the jackpot chances in packs up to $500 shrink
+     to keep each pack's average return the same. The $1500 pack keeps its bigger One of One chance. */
+  const wAvg = list => { const t = list.reduce((a, c) => a + (c.w || 1), 0); return list.reduce((a, c) => a + c.value * (c.w || 1), 0) / t; };
+  PACKS.forEach(p => { if (p.id.endsWith('vault')) return;
+    ['normal','high','max','fifty'].forEach(m => [p[m], p[m] && p[m].boost].forEach(md => { if (!md) return;
+      for (const r of ['A','P','X']) if (md.jackpot[r]) md.jackpot[r] *= wAvg(SETS.taloki.BY[r]) / wAvg(BY[r]); })); });
   return {id, sport: cfg.sport, sportName: cfg.sportName, name: cfg.name, setName: cfg.setName, eyebrow: cfg.eyebrow, headline: cfg.headline,
     packLabel: cfg.packLabel, chaseLabel:'Auto+', chaseNames:'Auto, Patch Auto and One of One', altView:'Players',
     RAR, ORDER:['C','U','R','E','A','P','X'], CARDS, BY, CARD, PACKS, GRADE: SPORT_GRADE, players: P};
@@ -202,7 +211,8 @@ const SPORT_PACKS = [
   {name:'All-Star Pack',     pk:'linear-gradient(160deg,#F4F6FA,#9AA3B2 55%,#4C5361)',  glow:'#8B5CF6'},
   {name:'MVP Pack',          pk:'linear-gradient(160deg,#F7E3A1,#C9A24C 55%,#5A4316)',  glow:'#E8C25A'},
   {name:'Hall of Fame Pack', pk:'linear-gradient(160deg,#1A1A1A,#5B4A2A 50%,#C9A24C)',  glow:'#C9A24C'},
-  {name:'GOAT Pack',         pk:'linear-gradient(160deg,#FFFFFF,#BFC6D2 30%,#1A1D24 70%,#000)', glow:'#C4B5FD'}
+  {name:'GOAT Pack',         pk:'linear-gradient(160deg,#FFFFFF,#BFC6D2 30%,#1A1D24 70%,#000)', glow:'#C4B5FD'},
+  {name:'Vault Pack',        pk:'linear-gradient(160deg,#FFF6D2,#C9A24C 28%,#14110A 62%,#000)', glow:'#E8C25A', badge:'1 OF 1'}
 ];
 
 SETS.nfl = buildSportSet('nfl', {

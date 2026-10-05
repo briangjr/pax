@@ -299,7 +299,13 @@ const PACKS = [
    normal:{odds:[0.5626, 0.1674, 0.16, 0.07, 0.03, 0.01], jackpot:{A:0, P:0, X:0}, skew:1.5, all:true,
             bands:[[36,200],[200,500],[520,720],[980,1500],[1500,3000],[3000,Infinity]]},
    high:  {odds:[0.262, 0.5931, 0.017, 0.031, 0.057, 0.0399], jackpot:{A:0, P:0, X:0}, skew:2, all:true,
-            bands:[[100,200],[200,500],[500,550],[550,650],[650,900],[900,Infinity]]}}
+            bands:[[100,200],[200,500],[500,550],[550,650],[650,900],[900,Infinity]]}},
+  /* $1500: the top pack. Its Gold tier carries a bigger jackpot for the very top cards (One of One in NFL/NBA). */
+  {id:'vault', name:'Eternal Pack', price:1500, gem:'∞', pk:'linear-gradient(160deg,#FFF6D2,#C9A24C 30%,#2A1B4A 65%,#05040A)', glow:'#E8C25A',
+   normal:{odds:[0.545, 0.27, 0.08, 0.05, 0.025, 0.03], jackpot:{A:0, P:0, X:1/200}, skew:1.5, all:true,
+            bands:[[150,600],[600,1350],[1550,2200],[2200,3500],[3500,7000],[7000,Infinity]]},
+   high:  {odds:[0.30, 0.55, 0.03, 0.04, 0.05, 0.03], jackpot:{A:0, P:0, X:1/250}, skew:1.5, all:true,
+            bands:[[300,600],[600,1500],[1500,1700],[1700,2000],[2000,3000],[3000,Infinity]]}}
 ];
 
 /* Gold Boost: costs 2x the pack price and makes Gold 25% of pulls. The other tiers shrink to fit,
@@ -330,6 +336,10 @@ const BOOST = {
     normal: {odds:[0.24782, 0.37755, 0.10511, 0.01502, 0.0045, 0.25], jackpot:{A:0, P:0, X:0}, skew:13.636, goldLo:450},
     high: {odds:[0.19901, 0.50883, 0.01291, 0.02355, 0.0057, 0.25], jackpot:{A:0, P:0, X:0}, skew:4.807, goldLo:450}
   },
+  vault: {
+    normal: {odds:[0.42, 0.21, 0.06, 0.04, 0.02, 0.25], jackpot:{A:0, P:0, X:1/100}, skew:2, goldLo:3500},
+    high: {odds:[0.232, 0.425, 0.023, 0.031, 0.039, 0.25], jackpot:{A:0, P:0, X:1/125}, skew:2, goldLo:2000}
+  },
   sovereign: {
     normal: {odds:[0.42621, 0.12682, 0.12121, 0.05303, 0.02273, 0.25], jackpot:{A:0, P:0, X:0}, skew:2.753, goldLo:1500},
     high: {odds:[0.20467, 0.4633, 0.01328, 0.02422, 0.04453, 0.25], jackpot:{A:0, P:0, X:0}, skew:1.137}
@@ -350,6 +360,10 @@ const STYLE_EXTRA = {
   legendary: {"max": {"odds": [0.9, 0, 0, 0, 0, 0.1], "jackpot": {"A": 0, "P": 0, "X": 0}, "skew": 3.0197, "all": true, "bands": [[2.5, 8.75], [0, 0], [0, 0], [0, 0], [0, 0], [100, Infinity]]}, "fifty": {"odds": [0.5, 0, 0, 0, 0, 0.5], "jackpot": {"A": 0, "P": 0, "X": 0}, "skew": -1.7143, "all": true, "bands": [[1.25, 6.25], [0, 0], [0, 0], [0, 0], [0, 0], [32.33, 53.88]]}},
   mythic: {"max": {"odds": [0.9, 0, 0, 0, 0, 0.1], "jackpot": {"A": 0, "P": 0, "X": 0}, "skew": 2.6241, "all": true, "bands": [[10, 35], [0, 0], [0, 0], [0, 0], [0, 0], [400, Infinity]]}, "fifty": {"odds": [0.5, 0, 0, 0, 0, 0.5], "jackpot": {"A": 0, "P": 0, "X": 0}, "skew": -1.0054, "all": true, "bands": [[5, 25], [0, 0], [0, 0], [0, 0], [0, 0], [129.95, 216.59]]}},
   sovereign: {"max": {"odds": [0.9, 0, 0, 0, 0, 0.1], "jackpot": {"A": 0, "P": 0, "X": 0}, "skew": 1.7354, "all": true, "bands": [[50, 175], [0, 0], [0, 0], [0, 0], [0, 0], [2000, Infinity]]}, "fifty": {"odds": [0.5, 0, 0, 0, 0, 0.5], "jackpot": {"A": 0, "P": 0, "X": 0}, "skew": -1.0044, "all": true, "bands": [[25, 125], [0, 0], [0, 0], [0, 0], [0, 0], [654.14, 1090.23]]}}
+};
+STYLE_EXTRA.vault = {
+  max:   {odds:[0.9, 0, 0, 0, 0, 0.1], jackpot:{A:0, P:0, X:1/150}, skew:2, all:true, bands:[[150,525],[0,0],[0,0],[0,0],[0,0],[6000,Infinity]]},
+  fifty: {odds:[0.5, 0, 0, 0, 0, 0.5], jackpot:{A:0, P:0, X:1/300}, skew:1, all:true, bands:[[75,375],[0,0],[0,0],[0,0],[0,0],[1800,3600]]}
 };
 PACKS.forEach(p => Object.assign(p, STYLE_EXTRA[p.id]));
 

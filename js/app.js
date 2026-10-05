@@ -113,11 +113,12 @@ const SPARKS = n => Array.from({length:n}, (_, i) => `<i style="left:${(i * 37 +
 function packHTML(p){
   const tier = Math.max(0, G.PACKS.indexOf(p)), cover = p.cover ? `;--packimg:url('${p.cover}')` : '';
   const emb = G.sport ? ICON[G.sport] : '<img src="images/brand/eye.webp" alt="">';
-  return `<div class="pack pk2 t${tier}${G.sport ? ' sp' : ''}${p.cover ? ' hasCover' : ''}" style="--pk:${p.pk};--glow:${p.glow}${cover}">
+  return `<div class="pack pk2 t${tier}${tier >= 7 ? ' t6' : ''}${G.sport ? ' sp' : ''}${p.cover ? ' hasCover' : ''}" style="--pk:${p.pk};--glow:${p.glow}${cover}">
     <span class="pkBg"></span>${tier >= 1 ? '<span class="pkBand"></span>' : ''}${tier >= 4 ? '<span class="pkHolo"></span>' : ''}${tier >= 5 ? '<span class="pkFrame"></span>' : ''}
     ${p.cover ? '' : `<span class="pkBrand">${G.sport ? 'PAX' : 'TALOKI'}</span>
     <span class="pkEmb">${tier >= 3 ? '<span class="pkRays"></span>' : ''}<span class="pkRing"></span><span class="pkIcon">${emb}</span></span>
-    ${tier >= 4 ? `<span class="pkSpark">${SPARKS(tier === 6 ? 14 : tier === 5 ? 9 : 6)}</span>` : ''}`}
+    ${tier >= 4 ? `<span class="pkSpark">${SPARKS(tier >= 7 ? 20 : tier === 6 ? 14 : tier === 5 ? 9 : 6)}</span>` : ''}
+    ${tier >= 7 ? `<span class="pkOrbit"></span><span class="pkBadge">${p.badge || 'ETERNAL'}</span>` : ''}`}
     <div class="tearTop"></div><i class="crimp ct"></i><i class="crimp cb"></i>
     <span class="gem">$${p.price}</span><span class="pname"><b>${p.name}</b><small>${G.packLabel}</small></span></div>`;
 }
@@ -265,6 +266,7 @@ function openStyleSheet(){
       <div class="ssOdds">Estimated Payout Odds:</div>
       <div class="orows">${oddsRows(p, tm, b)}</div>
       <div class="ssRange"><span>Min Value</span><b>${nice(lo)}</b><i class="dots"></i><b>${nice(hi)}</b><span>Max Pull</span></div>
+      ${(() => { const q = oneOfOneChance(p, tm, b); return q > 0 ? `<div class="ssOne"><b>One of One chance</b><span>1 in ${Math.round(1 / q).toLocaleString('en-US')}</span></div>` : ''; })()}
       <p class="ssNote">${p.name} · ${nice(cost(p, b))} · average card value ${money(st.ev)} (${Math.round(st.ev / cost(p, b) * 100)}%). Play money only. Every pull is random and the odds above are exact. Selling a card back pays 90% of its value.</p>
       <button class="buyBig" id="ssApply" style="--bc:${p.glow};color:${textOn(p.glow)}">Apply</button>`);
     $('#ssX').onclick = closeBS;
@@ -283,6 +285,7 @@ function cardChances(p, m, b){
     G.BY[r].forEach(card => pr.set(card, (pr.get(card) || 0) + c.jackpot[r] * cardW(card) / t)); }
   return [...pr].sort((a, b2) => b2[0].value - a[0].value);
 }
+function oneOfOneChance(p, m, b){ return cardChances(p, m, b).reduce((a, [c, q]) => a + (c.run === 1 ? q : 0), 0); }
 function openInside(){
   const p = curPack(), m = vol(), b = boostOn(), list = cardChances(p, m, b), SHOW = 60;
   openBS(`<div class="ssHead"><div class="ssIco">${packHTML(p)}</div>
@@ -904,7 +907,12 @@ function calibrate(){
     G.PACKS.forEach(p => Object.keys(MODES).forEach(m => [false, true].forEach(b => {
       if (b && !boostOK(m)) return; const c = conf(p, m, b); if (!c || !c.odds[5]) return;
       const target = 0.92 * cost(p, b), ev = sk => { const old = c.skew; c.skew = sk; const v = packStats(p, m, b).ev; c.skew = old; return v; };
-      let lo = -8, hi = 40; if (ev(lo) < target || ev(hi) > target) return;
+      let lo = -8, hi = 40;
+      if (ev(hi) > target && c.jackpot.X > 0) {     // top cards too valuable for this jackpot: shrink it until it fits
+        const j0 = c.jackpot.X; let a = 0, z = 1;
+        for (let i = 0; i < 50; i++) { const k = (a + z) / 2; c.jackpot.X = j0 * k; ev(hi) > target * 0.995 ? z = k : a = k; }
+        c.jackpot.X = j0 * a; }
+      if (ev(lo) < target || ev(hi) > target) { console.warn('calibrate: cannot hit 92%', k, p.id, m, b); return; }
       for (let i = 0; i < 60; i++) { const mid = (lo + hi) / 2; ev(mid) > target ? lo = mid : hi = mid; }
       c.skew = (lo + hi) / 2;
     }))); }
